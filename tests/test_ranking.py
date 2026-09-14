@@ -14,7 +14,7 @@ def _analysis(**overrides):
 
 
 def test_compute_overall_score_basic():
-    item = {"watch_count": 0, "status": "NEW"}
+    item = {"watch_count": 0, "status": "UNWATCHED"}
     score, breakdown = compute_overall_score(_analysis(), item)
     assert score == 80
     assert breakdown["already_watched_penalty"] == 0
@@ -36,14 +36,14 @@ def test_compute_overall_score_applies_applied_penalty():
 
 
 def test_compute_overall_score_is_deterministic():
-    item = {"watch_count": 0, "status": "NEW"}
+    item = {"watch_count": 0, "status": "UNWATCHED"}
     score1, _ = compute_overall_score(_analysis(development_relevance_score=50), item)
     score2, _ = compute_overall_score(_analysis(development_relevance_score=50), item)
     assert score1 == score2
 
 
 def test_compute_overall_score_clamped_to_range():
-    item = {"watch_count": 0, "status": "NEW"}
+    item = {"watch_count": 0, "status": "UNWATCHED"}
     score, _ = compute_overall_score(_analysis(
         development_relevance_score=0, implementation_value_score=0,
         practicality_score=0, learning_value_score=0, originality_score=0,
@@ -52,7 +52,7 @@ def test_compute_overall_score_clamped_to_range():
 
 
 def test_personal_relevance_bonus_included():
-    item = {"watch_count": 0, "status": "NEW"}
+    item = {"watch_count": 0, "status": "UNWATCHED"}
     score_no_bonus, _ = compute_overall_score(_analysis(), item, personal_relevance_bonus=0)
     score_with_bonus, _ = compute_overall_score(_analysis(), item, personal_relevance_bonus=10)
     assert score_with_bonus == score_no_bonus + 10

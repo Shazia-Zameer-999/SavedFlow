@@ -173,7 +173,7 @@ def watch_item(item_id):
     }
     if not item.get("watched_at"):
         updates["watched_at"] = now
-    if item.get("status") == "NEW":
+    if item.get("status") == "UNWATCHED":
         updates["status"] = "WATCHED"
 
     db.instagram_items.update_one({"_id": item["_id"]}, {"$set": updates})

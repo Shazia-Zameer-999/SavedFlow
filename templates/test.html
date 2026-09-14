@@ -754,7 +754,7 @@
               </option></select
             ><select id="filter-status">
               <option value="">All statuses</option>
-              <option>NEW</option>
+              <option>UNWATCHED</option>
               <option>WATCHED</option>
               <option>APPLIED</option>
               <option>NOT_USEFUL</option>
@@ -909,7 +909,7 @@ const esc = (x) =>
           thumb = meta.thumbnail_url
             ? `<img src="${esc(meta.thumbnail_url)}" alt="${esc(meta.visible_label || "Instagram preview")}" style="width:100%;height:145px;object-fit:cover;border-radius:9px;background:#edf0f4" onerror="this.remove()">`
             : "";
-        return `<article class="card item">${thumb}<div class="item-title">${esc(i.caption || meta.visible_label || i.creator_username || "Saved Instagram item")}</div><div class="muted">${esc(i.source_method || "MANUAL")} · ${esc(i.media_status || "UNKNOWN")}</div><div class="chips">${badge(i)}<span class="chip">Usefulness ${i.usefulness_score ?? "—"}</span><span class="chip">Dev ${i.development_relevance_score ?? "—"}</span></div><div class="muted">${i.analysis_status === "COMPLETED" ? "AI analyzed" : "Analysis " + String(i.analysis_status || "pending").toLowerCase()} · ${esc(i.status || "NEW")}</div><div class="item-actions"><button onclick="openItem('${i.id}')">Details</button><button onclick="openInstagram('${esc(i.url)}')">Open Instagram</button><button onclick="plan('${i.id}')">Plan</button><button onclick="watch('${i.id}')">${i.watch_count ? "Watched" : "Mark watched"}</button></div></article>`;
+        return `<article class="card item">${thumb}<div class="item-title">${esc(i.caption || meta.visible_label || i.creator_username || "Saved Instagram item")}</div><div class="muted">${esc(i.source_method || "MANUAL")} · ${esc(i.media_status || "UNKNOWN")}</div><div class="chips">${badge(i)}<span class="chip">Usefulness ${i.usefulness_score ?? "—"}</span><span class="chip">Dev ${i.development_relevance_score ?? "—"}</span></div><div class="muted">${i.analysis_status === "COMPLETED" ? "AI analyzed" : "Analysis " + String(i.analysis_status || "pending").toLowerCase()} · ${esc(i.status || "UNWATCHED")}</div><div class="item-actions"><button onclick="openItem('${i.id}')">Details</button><button onclick="openInstagram('${esc(i.url)}')">Open Instagram</button><button onclick="plan('${i.id}')">Plan</button><button onclick="watch('${i.id}')">${i.watch_count ? "Watched" : "Mark watched"}</button></div></article>`;
       }
       async function loadDashboard() {
         let d = await api("/api/dashboard");

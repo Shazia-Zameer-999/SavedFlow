@@ -89,3 +89,4 @@ class Config:
 class TestConfig(Config):
     TESTING = True
     MONGO_DB_NAME = "savedflow_test"
+    SAVEDFLOW_SYNC_TOKEN = "test-sync-token"

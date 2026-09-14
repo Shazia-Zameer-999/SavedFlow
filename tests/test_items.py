@@ -2,7 +2,7 @@ def test_create_and_get_item(client):
     resp = client.post("/api/items", json={"url": "https://www.instagram.com/reel/ABC123/"})
     assert resp.status_code == 201
     item = resp.get_json()["item"]
-    assert item["status"] == "NEW"
+    assert item["status"] == "UNWATCHED"
     assert item["normalized_url"] == "https://instagram.com/reel/ABC123"
 
     resp = client.get(f"/api/items/{item['id']}")
@@ -62,11 +62,11 @@ def test_delete_item(client):
 
 def test_list_items_filter_by_status(client):
     client.post("/api/items", json={"url": "https://www.instagram.com/reel/LIST1/"})
-    resp = client.get("/api/items?status=NEW")
+    resp = client.get("/api/items?status=UNWATCHED")
     assert resp.status_code == 200
     body = resp.get_json()
     assert body["pagination"]["total"] >= 1
-    assert all(item["status"] == "NEW" for item in body["items"])
+    assert all(item["status"] == "UNWATCHED" for item in body["items"])
 
 
 def test_watch_item(client):

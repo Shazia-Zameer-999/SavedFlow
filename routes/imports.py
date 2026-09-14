@@ -12,7 +12,7 @@ Instagram authentication therefore never needs to reach the Flask server.
 
 from datetime import datetime, timezone
 from bson import ObjectId
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 
 from config import Config
 from extensions import get_db
@@ -43,7 +43,7 @@ def _object_id(value):
 
 
 def _require_sync_token():
-    expected = Config.SAVEDFLOW_SYNC_TOKEN
+    expected = current_app.config["SAVEDFLOW_SYNC_TOKEN"]
 
     if not expected:
         raise ApiError(

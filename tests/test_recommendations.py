@@ -1,7 +1,7 @@
 from utils.dates import utcnow
 
 
-def _make_analyzed_item(db, url_suffix, scores, category=None, watch_count=0, status="NEW", recommendation=None, actionable_steps=None):
+def _make_analyzed_item(db, url_suffix, scores, category=None, watch_count=0, status="UNWATCHED", recommendation=None, actionable_steps=None):
     from models.item import new_item
     from models.analysis import new_analysis
     from utils.urls import normalize_instagram_url
