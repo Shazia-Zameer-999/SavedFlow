@@ -1,0 +1,2442 @@
+<!-- last working version? -->
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SavedFlow</title>
+    <style>
+        :root {
+            --font-family-primary: SF-Pro-Text, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            --font-size-xs: 0.1px;
+            --font-size-sm: 12px;
+            --font-size-md: 13px;
+            --font-size-lg: 14px;
+            --font-size-xl: 16px;
+            --font-size-2xl: 18px;
+            --font-size-3xl: 20px;
+            --font-size-4xl: 21px;
+            --font-weight-base: 400;
+            --line-height-base: 19.5px;
+
+            --color-text-primary: #ccd6f6;
+            --color-text-secondary: #8892b0;
+            --color-border-strong: #e5e7eb;
+            --color-text-inverse: #64ffda;
+            --color-surface-base: #000000;
+            --color-surface-muted: #112240;
+            --color-surface-raised: #262626;
+            --color-surface-strong: #0a192f;
+
+            --space-1: 3px;
+            --space-2: 4px;
+            --space-3: 5px;
+            --space-4: 6px;
+            --space-5: 8px;
+            --space-6: 10px;
+            --space-7: 12px;
+            --space-8: 13px;
+
+            --radius-xs: 4px;
+            --radius-sm: 6px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 9999px;
+
+            --motion-instant: 150ms;
+            --motion-fast: 200ms;
+            --motion-normal: 250ms;
+            --motion-slow: 600ms;
+
+            /* SavedFlow semantic aliases */
+            --nav: var(--color-surface-strong);
+            --bg: var(--color-surface-base);
+            --card: var(--color-surface-raised);
+            --ink: var(--color-text-primary);
+            --muted: var(--color-text-secondary);
+            --line: var(--color-border-strong);
+            --accent: var(--color-text-inverse);
+            --good: #64ffda;
+            --warn: #f6c177;
+            --bad: #ff7b72;
+            --nav-hover: #102a4c;
+            --nav-active: #16385f;
+            --accent-soft: #102d35;
+            --surface-soft: #0a192f;
+            --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.24);
+            --shadow-md: 0 12px 34px rgba(0, 0, 0, 0.38);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            margin: 0;
+            width: 100%;
+            min-width: 0;
+            min-height: 100%;
+            -webkit-text-size-adjust: 100%;
+            overscroll-behavior-x: none;
+            background: var(--color-surface-base);
+            color: var(--color-text-primary);
+            font: var(--font-weight-base) var(--font-size-md) / var(--line-height-base) var(--font-family-primary);
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+            min-width: 0;
+        }
+
+        /* =========================================
+         SIDEBAR
+         ========================================= */
+
+        .sidebar {
+            position: fixed;
+            width: 240px;
+            inset: 0 auto 0 0;
+            background: var(--nav);
+            color: #bac4d4;
+            padding: 26px 16px;
+            z-index: 3;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            padding: 0 12px 30px;
+            letter-spacing: -0.05em;
+        }
+
+        .logo span {
+            color: #8c80ff;
+        }
+
+        .nav {
+            display: grid;
+            gap: 4px;
+        }
+
+        .nav button {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            color: inherit;
+            text-align: left;
+            border-radius: 9px;
+            padding: 11px 12px;
+            cursor: pointer;
+        }
+
+        .nav button:hover,
+        .nav button.active {
+            background: #273149;
+            color: #fff;
+        }
+
+        /* =========================================
+         MAIN CONTENT
+         ========================================= */
+
+        /*
+        IMPORTANT FIX:
+        The old width:100% combined with margin-left:240px
+        could make the main area wider than the viewport.
+
+        flex: 1 allows the main area to occupy only the
+        remaining space beside the fixed sidebar.
+      */
+
+        .main {
+            flex: 1;
+            min-width: 0;
+            width: auto;
+            max-width: none;
+            margin-left: 240px;
+            padding: 30px 4vw;
+        }
+
+        /* =========================================
+         TOP HEADER
+         ========================================= */
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 0.13em;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .title {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            margin-top: 2px;
+        }
+
+        /* =========================================
+         BUTTONS
+         ========================================= */
+
+        .btn {
+            min-height: 40px;
+            border: 0;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .btn.alt {
+            background: #fff;
+            color: var(--ink);
+            border: 1px solid var(--line);
+        }
+
+        .btn.danger {
+            color: var(--bad);
+        }
+
+        /* =========================================
+         VIEWS
+         ========================================= */
+
+        .view.hidden {
+            display: none;
+        }
+
+        /* =========================================
+         METRIC CARDS
+         ========================================= */
+
+        .metrics {
+            display: grid;
+
+            /*
+          minmax(0, 1fr) is the important part.
+          It allows each metric card to shrink properly
+          instead of pushing the fourth card outside
+          the viewport.
+        */
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+
+            gap: 14px;
+            width: 100%;
+        }
+
+        .metric {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        /* =========================================
+         GENERAL CARD
+         ========================================= */
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 7px 24px #17203308;
+
+            /*
+          Prevent card content from forcing the grid
+          wider than its available space.
+        */
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        /* =========================================
+         METRIC CONTENT
+         ========================================= */
+
+        .metric .value {
+            font-size: 28px;
+            font-weight: 850;
+            margin-top: 4px;
+            min-width: 0;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* =========================================
+         SECTIONS
+         ========================================= */
+
+        .section {
+            margin-top: 30px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            letter-spacing: -0.03em;
+            margin: 0;
+        }
+
+        /* =========================================
+         CONTENT CARD GRID
+         ========================================= */
+
+        .cards {
+            display: grid;
+
+            /*
+          This is the main card overflow fix.
+        */
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+
+            gap: 14px;
+            width: 100%;
+            min-width: 0;
+        }
+
+        /*
+        Grid children must be allowed to shrink.
+      */
+        .cards>* {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        /* =========================================
+         ITEM CARDS
+         ========================================= */
+
+        .item {
+            min-width: 0;
+            max-width: 100%;
+            min-height: 210px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+
+            /*
+          Prevent long content/images from visually
+          escaping the rounded card.
+        */
+            overflow: hidden;
+        }
+
+        /*
+        The existing JavaScript puts inline dimensions
+        on images, so we preserve those dimensions.
+        These rules simply make sure the image cannot
+        exceed the card itself.
+      */
+
+        .item img {
+            display: block;
+            max-width: 100%;
+            border-radius: 9px;
+        }
+
+        /* =========================================
+         ITEM TITLE
+         ========================================= */
+
+        .item-title {
+            /*
+          Critical for CSS Grid:
+          allows long titles to shrink within
+          their grid column.
+        */
+            min-width: 0;
+            max-width: 100%;
+
+            font-weight: 800;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* =========================================
+         CHIPS
+         ========================================= */
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .chip {
+            display: inline-flex;
+            min-width: 0;
+            max-width: 100%;
+
+            border-radius: 99px;
+            padding: 3px 8px;
+            background: #eeecff1c;
+            color: #5648d7;
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+        .chip.good {
+            background: #e5f6ed;
+            color: var(--good);
+        }
+
+        .chip.warn {
+            background: #fff5df;
+            color: var(--warn);
+        }
+
+        .chip.bad {
+            background: #ffebeb;
+            color: var(--bad);
+        }
+
+        /* =========================================
+         ITEM ACTIONS
+         ========================================= */
+
+        .item-actions {
+            display: flex;
+            gap: 7px;
+            margin-top: auto;
+            flex-wrap: wrap;
+
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .item-actions button {
+            border: 0;
+            background: #f0f2f6;
+            color: #3c4655;
+            border-radius: 7px;
+            padding: 7px 9px;
+            font-size: 12px;
+            cursor: pointer;
+
+            /*
+          Prevent buttons from forcing the card wider.
+        */
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        /* =========================================
+         TOOLBAR
+         ========================================= */
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .toolbar input,
+        .toolbar select,
+        .form input,
+        .form textarea,
+        .form select {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 9px 11px;
+            background: #fff;
+            color: var(--ink);
+        }
+
+        .toolbar input {
+            min-width: 270px;
+        }
+
+        /* =========================================
+         EMPTY STATE
+         ========================================= */
+
+        .empty {
+            text-align: center;
+            color: var(--muted);
+            padding: 32px;
+        }
+
+        /* =========================================
+         HEALTH / REVIEW
+         ========================================= */
+
+        .health,
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        /* =========================================
+         DRAWER
+         ========================================= */
+
+        .drawer {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+
+            width: min(650px, calc(100vw - 40px));
+
+            max-height: 82vh;
+            overflow: auto;
+            z-index: 5;
+
+            min-width: 0;
+        }
+
+        .drawer.hidden {
+            display: none;
+        }
+
+        .drawer-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .drawer-head h2 {
+            min-width: 0;
+            flex: 1 1 auto;
+            overflow-wrap: anywhere;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .drawer-head .btn {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
+        .analysis-copy h3 {
+            margin-bottom: 5px;
+        }
+
+        .analysis-copy ul,
+        .analysis-copy ol {
+            padding-left: 22px;
+        }
+
+        .analysis-warning {
+            padding: 11px;
+            border-radius: 8px;
+            background: #fff5df;
+            color: #805b15;
+            margin: 10px 0;
+        }
+
+        /* =========================================
+         PROGRESS
+         ========================================= */
+
+        .progress {
+            height: 8px;
+            background: #edf0f4;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress i {
+            display: block;
+            height: 100%;
+            background: var(--accent);
+        }
+
+        /* =========================================
+         LIBRARY PAGINATION
+         ========================================= */
+
+        .library-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 24px;
+            padding: 8px 0;
+            flex-wrap: wrap;
+        }
+
+        .library-pagination .page-info {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .library-pagination button {
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--ink);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-weight: 700;
+            cursor: pointer;
+            min-width: 84px;
+        }
+
+        .library-pagination button:hover:not(:disabled) {
+            border-color: var(--accent);
+        }
+
+        .library-pagination button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* =========================================
+         POLISHED APP UI
+         ========================================= */
+
+        :root {
+            --nav-hover: #202a40;
+            --nav-active: #2b3550;
+            --accent-soft: #eeecff1c;
+            --surface-soft: #f8f9fc;
+            --shadow-sm: 0 2px 10px rgba(23, 32, 51, 0.05);
+            --shadow-md: 0 10px 30px rgba(23, 32, 51, 0.08);
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        a:focus-visible {
+            outline: 3px solid rgba(103, 88, 232, 0.28);
+            outline-offset: 2px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .sidebar-header {
+            display: block;
+        }
+
+        .nav button {
+            min-height: 44px;
+            font-weight: 650;
+            transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+        }
+
+        .nav button:hover {
+            background: var(--nav-hover);
+            color: #fff;
+        }
+
+        .nav button.active {
+            background: var(--nav-active);
+            color: #fff;
+            box-shadow: inset 3px 0 0 var(--accent);
+        }
+
+        .main {
+            max-width: 1600px;
+        }
+
+        .top {
+            position: relative;
+        }
+
+        .top-left {
+            min-width: 0;
+        }
+
+        .top>.btn {
+            white-space: nowrap;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card {
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease;
+        }
+
+        .item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: #d9ddec;
+        }
+
+        .metric {
+            min-height: 96px;
+        }
+
+        .metric .muted {
+            font-weight: 650;
+        }
+
+        .toolbar {
+            padding: 12px;
+            background: var(--surface-soft);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+        }
+
+        .toolbar input,
+        .toolbar select,
+        .form input,
+        .form textarea,
+        .form select {
+            min-height: 42px;
+            outline: none;
+            transition: border-color 150ms ease, box-shadow 150ms ease;
+        }
+
+        .toolbar input:focus,
+        .toolbar select:focus,
+        .form input:focus,
+        .form textarea:focus,
+        .form select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(103, 88, 232, 0.10);
+        }
+
+        .item-actions button,
+        .library-pagination button,
+        .btn {
+            min-height: 42px;
+            transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+        }
+
+        .btn:hover:not(:disabled),
+        .item-actions button:hover:not(:disabled),
+        .library-pagination button:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .item-actions button:first-child {
+            background: var(--accent-soft);
+            color: #5648d7;
+        }
+
+        .empty {
+            border: 1px dashed var(--line);
+            border-radius: 14px;
+            background: var(--surface-soft);
+        }
+
+        .drawer {
+            box-shadow: 0 18px 60px rgba(23, 32, 51, 0.18);
+        }
+
+        #toast {
+            position: fixed;
+            left: 50%;
+            bottom: max(20px, env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            z-index: 50;
+            margin: 0;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: #172033;
+            color: #fff;
+            box-shadow: var(--shadow-md);
+            pointer-events: none;
+            max-width: min(92vw, 520px);
+            text-align: center;
+        }
+
+        @media (min-width: 901px) {
+            .mobile-menu-btn {
+                display: none !important;
+            }
+        }
+
+        /* =========================================
+         RESPONSIVE — TABLET / SMALL DESKTOP
+         ========================================= */
+
+        @media (max-width: 1200px) {
+            .metrics {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* =========================================
+         MOBILE NAVIGATION
+         ========================================= */
+
+        .mobile-menu-btn,
+        .sidebar-close,
+        .sidebar-backdrop {
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 240px;
+                padding: 22px 16px;
+                transform: translateX(-100%);
+                transition: transform 220ms ease;
+                box-shadow: 18px 0 45px rgba(17, 24, 39, 0.18);
+                z-index: 20;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                padding-top: max(22px, env(safe-area-inset-top));
+                padding-bottom: max(22px, env(safe-area-inset-bottom));
+            }
+
+            body.nav-open {
+                overflow: hidden;
+            }
+
+            body.nav-open .sidebar {
+                transform: translateX(0);
+            }
+
+            .sidebar-backdrop {
+                position: fixed;
+                inset: 0;
+                display: block;
+                background: rgba(17, 24, 39, 0.45);
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 220ms ease, visibility 220ms ease;
+                z-index: 19;
+            }
+
+            body.nav-open .sidebar-backdrop {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .sidebar-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+
+            .logo {
+                font-size: 22px;
+                padding: 0 12px;
+            }
+
+            .sidebar-close {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 44px;
+                height: 44px;
+                border: 1px solid #34405a;
+                border-radius: 10px;
+                background: transparent;
+                color: #fff;
+                font-size: 22px;
+                cursor: pointer;
+            }
+
+            .nav button {
+                font-size: 14px;
+                text-align: left;
+                min-height: 46px;
+                padding: 11px 12px;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: max(18px, env(safe-area-inset-top)) 4vw max(24px, env(safe-area-inset-bottom));
+            }
+
+            .mobile-menu-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex: 0 0 44px;
+                width: 44px;
+                height: 44px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: #fff;
+                color: var(--ink);
+                font-size: 21px;
+                cursor: pointer;
+            }
+
+            .top {
+                align-items: center;
+            }
+
+            .top-left {
+                display: flex;
+                align-items: center;
+                min-width: 0;
+                gap: 12px;
+            }
+
+            .title {
+                font-size: clamp(24px, 4vw, 30px);
+            }
+
+            .section-head {
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .health,
+            .review-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .toolbar input,
+            .toolbar select,
+            .toolbar button {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .toolbar input {
+                grid-column: 1 / -1;
+            }
+        }
+
+        /* =========================================
+         RESPONSIVE — MOBILE
+         ========================================= */
+
+        @media (max-width: 600px) {
+            .main {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+
+            .top {
+                gap: 12px;
+                margin-bottom: 22px;
+            }
+
+            .top-left {
+                flex: 1;
+            }
+
+            .eyebrow {
+                font-size: 10px;
+            }
+
+            .title {
+                font-size: 24px;
+                line-height: 1.15;
+            }
+
+            .top>.btn {
+                min-height: 44px;
+                padding: 10px 12px;
+                font-size: 12px;
+                flex: 0 0 auto;
+            }
+
+            .metrics {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 9px;
+            }
+
+            .metric {
+                padding: 14px;
+            }
+
+            .metric .value {
+                font-size: 24px;
+            }
+
+            .cards {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .section {
+                margin-top: 24px;
+            }
+
+            .section-head {
+                flex-wrap: wrap;
+            }
+
+            .section-head>.muted {
+                width: 100%;
+            }
+
+            .toolbar {
+                grid-template-columns: 1fr;
+                padding: 10px;
+                gap: 8px;
+            }
+
+            .toolbar input {
+                grid-column: auto;
+                min-height: 46px;
+            }
+
+            .toolbar select,
+            .toolbar button {
+                min-height: 44px;
+            }
+
+            .item {
+                min-height: 0;
+            }
+
+            .item img {
+                aspect-ratio: 16 / 9;
+                height: auto !important;
+                object-fit: cover;
+            }
+
+            .item-actions {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+
+            .item-actions button {
+                width: 100%;
+                min-height: 44px;
+                padding: 9px 8px;
+            }
+
+            .library-pagination {
+                gap: 8px;
+                margin-top: 18px;
+            }
+
+            .library-pagination button {
+                flex: 1;
+                min-width: 0;
+                min-height: 44px;
+            }
+
+            .library-pagination .page-info {
+                width: 100%;
+                order: -1;
+            }
+
+            .drawer {
+                left: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                max-height: 92vh;
+                border-radius: 18px 18px 0 0;
+                padding: 16px;
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+                z-index: 30;
+                box-shadow: 0 -12px 40px rgba(23, 32, 51, 0.16);
+            }
+
+            .drawer-head {
+                position: sticky;
+                top: -16px;
+                background: var(--card);
+                padding: 4px 0 12px;
+                z-index: 1;
+            }
+
+            .drawer-head h2 {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 18px;
+            }
+
+            .drawer .form button {
+                width: 100%;
+                min-height: 44px;
+                margin: 4px 0;
+            }
+
+            .drawer .form textarea,
+            .drawer .form input,
+            .drawer .form select {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            code {
+                display: block;
+                max-width: 100%;
+                overflow-x: auto;
+                white-space: pre-wrap;
+                overflow-wrap: anywhere;
+            }
+        }
+
+        /* =========================================
+         VERY SMALL MOBILE SAFETY
+         ========================================= */
+
+        @media (max-width: 380px) {
+            .main {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .top>.btn {
+                font-size: 11px;
+                padding: 9px 10px;
+            }
+
+            .metric {
+                padding: 12px;
+            }
+
+            .metric .value {
+                font-size: 22px;
+            }
+
+            .card {
+                padding: 14px;
+            }
+
+            .item-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .sidebar,
+            .sidebar-backdrop {
+                transition: none;
+            }
+        }
+
+        .card {
+            padding: 14px;
+        }
+
+        .title {
+            font-size: 27px;
+        }
+
+        .item-actions button {
+            font-size: 11px;
+            padding: 7px 8px;
+        }
+        }
+
+        /* =========================================
+               DESIGN SYSTEM APPLICATION
+               ========================================= */
+
+        .sidebar {
+            background: var(--color-surface-strong);
+            color: var(--color-text-secondary);
+            border-right-color: rgba(204, 214, 246, 0.12);
+        }
+
+        .logo {
+            color: var(--color-text-primary);
+            font-size: var(--font-size-4xl);
+            letter-spacing: -0.03em;
+        }
+
+        .logo span {
+            color: var(--color-text-inverse);
+        }
+
+        .nav {
+            gap: var(--space-2);
+        }
+
+        .nav button {
+            color: var(--color-text-secondary);
+            border-radius: var(--radius-sm);
+            padding: var(--space-7) var(--space-7);
+            font-size: var(--font-size-md);
+            font-weight: 400;
+            min-height: 44px;
+        }
+
+        .nav button:hover {
+            background: var(--nav-hover);
+            color: var(--color-text-primary);
+        }
+
+        .nav button:active,
+        .nav button.active {
+            background: var(--nav-active);
+            color: var(--color-text-primary);
+            box-shadow: inset 3px 0 0 var(--color-text-inverse);
+        }
+
+        .nav button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .main {
+            background: var(--color-surface-base);
+        }
+
+        .eyebrow {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+            font-weight: 400;
+        }
+
+        .title {
+            color: var(--color-text-primary);
+            font-size: clamp(var(--font-size-3xl), 3vw, 28px);
+            font-weight: 400;
+            letter-spacing: -0.025em;
+        }
+
+        .btn {
+            min-height: 44px;
+            border-radius: var(--radius-sm);
+            padding: var(--space-6) var(--space-7);
+            font-size: var(--font-size-md);
+            font-weight: 400;
+            transition:
+                transform var(--motion-instant) ease,
+                background var(--motion-instant) ease,
+                border-color var(--motion-instant) ease,
+                box-shadow var(--motion-instant) ease,
+                opacity var(--motion-instant) ease;
+        }
+
+        .btn:not(.alt) {
+            background: var(--color-text-inverse);
+            color: #00110e;
+        }
+
+        .btn:hover:not(:disabled) {
+            filter: brightness(1.05);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .btn.alt {
+            background: var(--color-surface-muted);
+            color: var(--color-text-primary);
+            border-color: rgba(229, 231, 235, 0.22);
+        }
+
+        .btn.alt:hover:not(:disabled) {
+            border-color: var(--color-text-inverse);
+        }
+
+        .btn.danger {
+            color: var(--bad);
+        }
+
+        .card {
+            background: var(--color-surface-raised);
+            border-color: rgba(229, 231, 235, 0.14);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card:hover {
+            border-color: rgba(100, 255, 218, 0.22);
+        }
+
+        .metric {
+            min-height: 96px;
+        }
+
+        .metric .value {
+            color: var(--color-text-primary);
+            font-size: var(--font-size-4xl);
+            font-weight: 400;
+        }
+
+        .muted {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+        }
+
+        .section h2,
+        .drawer-head h2 {
+            color: var(--color-text-primary);
+            font-size: var(--font-size-2xl);
+            font-weight: 400;
+        }
+
+        .toolbar {
+            background: var(--color-surface-strong);
+            border-color: rgba(229, 231, 235, 0.14);
+            border-radius: var(--radius-md);
+        }
+
+        .toolbar input,
+        .toolbar select,
+        .form input,
+        .form textarea,
+        .form select {
+            background: var(--color-surface-base);
+            color: var(--color-text-primary);
+            border-color: rgba(229, 231, 235, 0.20);
+            border-radius: var(--radius-sm);
+            min-height: 44px;
+        }
+
+        .toolbar input::placeholder,
+        .form input::placeholder,
+        .form textarea::placeholder {
+            color: var(--color-text-secondary);
+        }
+
+        .toolbar input:focus,
+        .toolbar select:focus,
+        .form input:focus,
+        .form textarea:focus,
+        .form select:focus {
+            border-color: var(--color-text-inverse);
+            box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.12);
+        }
+
+        .chip {
+            background: var(--accent-soft);
+            color: var(--color-text-inverse);
+            border-radius: var(--radius-xl);
+            padding: var(--space-3) var(--space-6);
+            font-size: var(--font-size-sm);
+        }
+
+        .chip.good {
+            background: #0c302a;
+            color: var(--color-text-inverse);
+        }
+
+        .chip.warn {
+            background: #352a13;
+            color: var(--warn);
+        }
+
+        .chip.bad {
+            background: #35191b;
+            color: var(--bad);
+        }
+
+        .item-actions {
+            gap: var(--space-5);
+        }
+
+        .item-actions button {
+            min-height: 44px;
+            background: var(--color-surface-muted);
+            color: var(--color-text-primary);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+        }
+
+        .item-actions button:hover:not(:disabled) {
+            background: var(--nav-hover);
+            color: var(--color-text-inverse);
+        }
+
+        .item-actions button:first-child {
+            background: var(--accent-soft);
+            color: var(--color-text-inverse);
+        }
+
+        .empty {
+            background: var(--color-surface-strong);
+            color: var(--color-text-secondary);
+            border-color: rgba(229, 231, 235, 0.20);
+        }
+
+        .drawer {
+            background: var(--color-surface-raised);
+            border-color: rgba(229, 231, 235, 0.16);
+            box-shadow: var(--shadow-md);
+        }
+
+        .drawer a {
+            color: var(--color-text-inverse);
+        }
+
+        .analysis-warning {
+            background: #352a13;
+            color: var(--warn);
+        }
+
+        .library-pagination button {
+            background: var(--color-surface-muted);
+            color: var(--color-text-primary);
+            border-color: rgba(229, 231, 235, 0.20);
+            min-height: 44px;
+        }
+
+        .library-pagination button:hover:not(:disabled) {
+            border-color: var(--color-text-inverse);
+        }
+
+        .library-pagination button:disabled {
+            opacity: 0.4;
+        }
+
+        .progress {
+            background: var(--color-surface-muted);
+        }
+
+        .progress i {
+            background: var(--color-text-inverse);
+        }
+
+        .mobile-menu-btn,
+        .sidebar-close {
+            background: var(--color-surface-muted);
+            color: var(--color-text-primary);
+            border-color: rgba(229, 231, 235, 0.20);
+        }
+
+        .mobile-menu-btn:hover,
+        .sidebar-close:hover {
+            border-color: var(--color-text-inverse);
+            color: var(--color-text-inverse);
+        }
+
+        .sidebar-backdrop {
+            background: rgba(0, 0, 0, 0.68);
+        }
+
+        #toast {
+            background: var(--color-surface-muted);
+            color: var(--color-text-primary);
+            border: 1px solid rgba(100, 255, 218, 0.18);
+        }
+
+        /* Keyboard-first interaction requirements */
+        :where(button, input, select, textarea, a):focus-visible {
+            outline: 2px solid var(--color-text-inverse);
+            outline-offset: 3px;
+        }
+
+        /* Touch targets */
+        @media (pointer: coarse) {
+
+            button,
+            select,
+            input,
+            textarea,
+            a {
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .nav button,
+            .btn,
+            .item-actions button,
+            .library-pagination button {
+                min-height: 44px;
+            }
+        }
+
+        /* Long content must never force horizontal overflow. */
+        .card,
+        .item,
+        .drawer,
+        .section,
+        .section-head,
+        .analysis-copy,
+        .form {
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 600px) {
+            .top {
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                padding-top: max(8px, env(safe-area-inset-top));
+                padding-bottom: 10px;
+                background: rgba(0, 0, 0, 0.94);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+
+            .title {
+                font-size: var(--font-size-3xl);
+            }
+
+            .top>.btn {
+                font-size: var(--font-size-sm);
+            }
+
+            .metric {
+                min-height: 88px;
+            }
+
+            .section-head {
+                align-items: center;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+
+
+        /* =========================================
+               SAVEDFLOW V2 — VISUAL REFINEMENT
+               ========================================= */
+
+        :root {
+            --surface-card: #071526;
+            --surface-card-hover: #0a1b30;
+            --surface-input: #02070d;
+            --surface-chip: #10223a;
+            --surface-chip-hover: #15304d;
+            --border-subtle: rgba(204, 214, 246, 0.12);
+            --border-card: rgba(204, 214, 246, 0.16);
+            --border-accent: rgba(100, 255, 218, 0.42);
+            --text-card: var(--color-text-primary);
+            --text-meta: var(--color-text-secondary);
+        }
+
+        body {
+            font-weight: 400;
+            letter-spacing: 0;
+        }
+
+        .sidebar {
+            width: 220px;
+        }
+
+        .main {
+            margin-left: 220px;
+            padding-left: 34px;
+            padding-right: 34px;
+        }
+
+        .sidebar-header {
+            padding-left: 24px;
+            padding-right: 18px;
+        }
+
+        .logo {
+            font-size: var(--font-size-3xl);
+            font-weight: 500;
+        }
+
+        .nav {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        .nav button {
+            font-weight: 400;
+            letter-spacing: 0;
+        }
+
+        .nav button.active {
+            box-shadow: inset 2px 0 0 var(--color-text-inverse);
+        }
+
+        .top {
+            margin-bottom: 24px;
+        }
+
+        .title {
+            font-size: clamp(20px, 2.7vw, 26px);
+            font-weight: 400;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .toolbar {
+            gap: 8px;
+            padding: 12px;
+            background: rgba(10, 25, 47, 0.78);
+            border-color: var(--border-subtle);
+            box-shadow: none;
+        }
+
+        .toolbar input,
+        .toolbar select,
+        .form input,
+        .form textarea,
+        .form select {
+            background: var(--surface-input);
+            border-color: var(--border-subtle);
+        }
+
+        .section-head {
+            margin-bottom: 12px;
+        }
+
+        .section-head strong {
+            font-weight: 400;
+        }
+
+        /* Content cards: quieter surface, tighter rhythm, clearer hierarchy. */
+        .item {
+            background: var(--surface-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            box-shadow: none;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .item:hover {
+            background: var(--surface-card-hover);
+            border-color: rgba(100, 255, 218, 0.24);
+            transform: translateY(-1px);
+        }
+
+        .item img {
+            border-radius: var(--radius-sm);
+        }
+
+        .item-title {
+            color: var(--text-card);
+            font-size: var(--font-size-md);
+            font-weight: 500;
+            line-height: 1.45;
+            margin-top: 10px;
+        }
+
+        .item-meta {
+            color: var(--text-meta);
+            font-size: var(--font-size-sm);
+            line-height: 1.5;
+            margin-top: 5px;
+        }
+
+        .item .chips {
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .chip {
+            padding: 3px 8px;
+            font-size: var(--font-size-sm);
+            line-height: 18px;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .chip:hover {
+            background: var(--surface-chip-hover);
+        }
+
+        .item-status {
+            color: var(--text-meta);
+            font-size: var(--font-size-sm);
+            line-height: 1.45;
+            margin-top: 8px;
+        }
+
+        .item-actions {
+            margin-top: 12px;
+            padding-top: 0;
+            gap: 6px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .item-actions button {
+            min-height: 38px;
+            padding: 6px 10px;
+            background: var(--surface-chip);
+            border: 1px solid transparent;
+            color: var(--color-text-primary);
+            font-size: var(--font-size-sm);
+        }
+
+        .item-actions button:first-child {
+            background: var(--color-text-inverse);
+            color: #00110e;
+            font-weight: 500;
+        }
+
+        .item-actions button:hover:not(:disabled) {
+            background: var(--surface-chip-hover);
+            border-color: var(--border-accent);
+            color: var(--color-text-primary);
+        }
+
+        .item-actions button:first-child:hover:not(:disabled) {
+            background: #7affdf;
+            color: #00110e;
+        }
+
+        .item-actions button:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .item-actions button:disabled {
+            opacity: 0.42;
+        }
+
+        .empty {
+            background: var(--surface-card);
+            border-color: var(--border-subtle);
+            border-radius: var(--radius-md);
+        }
+
+        .drawer {
+            background: #061321;
+            border-color: var(--border-subtle);
+        }
+
+        .drawer-head {
+            border-bottom-color: var(--border-subtle);
+        }
+
+        #toast {
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Responsive: keep the content-first hierarchy at narrower widths. */
+        @media (max-width: 1100px) {
+            .main {
+                padding-left: 24px;
+                padding-right: 24px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                width: min(280px, 86vw);
+            }
+
+            .main {
+                margin-left: 0;
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .main {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .toolbar {
+                padding: 10px;
+            }
+
+            .item {
+                padding: 10px;
+            }
+
+            .item-actions {
+                gap: 5px;
+            }
+
+            .item-actions button {
+                flex: 1 1 auto;
+            }
+
+            .item-actions button:first-child {
+                flex-basis: 100%;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .top {
+                gap: 8px;
+            }
+
+            .top>.btn {
+                padding-left: 9px;
+                padding-right: 9px;
+            }
+
+            .item-actions button {
+                flex: 1 1 100%;
+            }
+        }
+
+        /* Empty/error/loading states must remain legible and predictable. */
+        .loading,
+        [aria-busy="true"] {
+            cursor: progress;
+        }
+
+        .error,
+        .analysis-error {
+            color: var(--bad);
+        }
+
+        :where(button, input, select, textarea, a):focus-visible {
+            outline: 2px solid var(--color-text-inverse);
+            outline-offset: 3px;
+            box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.10);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .item,
+            .btn,
+            .nav button,
+            .item-actions button {
+                transition: none !important;
+            }
+
+            .item:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
+            <div class="sidebar-header">
+                <div class="logo">Saved<span>Flow</span></div>
+                <button class="sidebar-close" type="button" aria-label="Close navigation" onclick="closeNav()">
+                    ×
+                </button>
+            </div>
+            <nav class="nav">
+                <button class="active" data-view="dashboard">◈ &nbsp;Dashboard</button><button data-view="library">▦
+                    &nbsp;Library</button><button data-view="recommendations">✦ &nbsp;Recommendations</button><button
+                    data-view="implementation">✓ &nbsp;Implementation</button><button data-view="review">◷ &nbsp;Weekly
+                    Review</button><button data-view="settings">⚙ &nbsp;Settings</button>
+            </nav>
+        </aside>
+        <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true" onclick="closeNav()"></div>
+
+        <main class="main">
+            <header class="top">
+                <div class="top-left">
+                    <button class="mobile-menu-btn" type="button" aria-label="Open navigation" aria-controls="sidebar"
+                        aria-expanded="false" onclick="toggleNav()">
+                        ☰
+                    </button>
+                    <div>
+                        <div class="eyebrow">Personal knowledge base</div>
+                        <div class="title" id="page-title">Your saves, in flow.</div>
+                    </div>
+                </div>
+                <button class="btn" type="button" aria-label="Sync Instagram Saved collection" onclick="showSync()">
+                    Sync Instagram Saved
+                </button>
+            </header>
+            <section id="dashboard" class="view">
+                <div class="metrics" id="metrics"></div>
+                <div class="section">
+                    <div class="section-head">
+                        <h2>Today's focus</h2>
+                        <button class="btn alt" onclick="go('recommendations')">
+                            View all
+                        </button>
+                    </div>
+                    <div class="cards" id="focus"></div>
+                </div>
+                <div class="section">
+                    <h2>Recently saved</h2>
+                    <div class="cards" id="recent"></div>
+                </div>
+            </section>
+            <section id="library" class="view hidden">
+                <div class="toolbar">
+                    <input id="search" placeholder="Search captions, creators, notes" /><select id="sort">
+                        <option value="created_at">Newest</option>
+                        <option value="usefulness">Usefulness</option>
+                        <option value="development_relevance">
+                            Development relevance
+                        </option>
+                    </select><select id="filter-status">
+                        <option value="">All statuses</option>
+                        <option>UNWATCHED</option>
+                        <option>WATCHED</option>
+                        <option>APPLIED</option>
+                        <option>NOT_USEFUL</option>
+                        <option>ARCHIVED</option>
+                    </select><button class="btn alt" onclick="loadLibrary()">Refresh</button>
+                </div>
+                <div class="muted" id="library-count"></div>
+                <div class="cards" id="library-cards"></div>
+                <div class="library-pagination" id="library-pagination"></div>
+            </section>
+            <section id="recommendations" class="view hidden">
+                <div class="section-head">
+                    <h2>Recommendations for you</h2>
+                    <span class="muted">Based on analysis and your activity</span>
+                </div>
+                <div class="cards" id="recommendation-cards"></div>
+            </section>
+            <section id="implementation" class="view hidden">
+                <div class="section-head">
+                    <h2>Implementation queue</h2>
+                    <button class="btn alt" onclick="loadActions()">Refresh</button>
+                </div>
+                <div class="cards" id="implementation-cards"></div>
+                <div class="section">
+                    <h2>Actions</h2>
+                    <div id="actions-list"></div>
+                </div>
+            </section>
+            <section id="review" class="view hidden">
+                <div class="card">
+                    <div class="section-head">
+                        <h2>Weekly review</h2>
+                        <button class="btn" onclick="generateReview()">
+                            Generate review
+                        </button>
+                    </div>
+                    <div id="review-content" class="empty">
+                        A grounded review is generated from your real activity.
+                    </div>
+                </div>
+            </section>
+            <section id="settings" class="view hidden">
+                <div class="health" id="health-cards"></div>
+
+                <div class="card section">
+                    <div class="section-head">
+                        <div>
+                            <h2>Instagram Saved sync</h2>
+                            <p class="muted">
+                                Sync your Saved collection through the local browser agent.
+                                Your Instagram password, cookies, and browser session stay on
+                                this computer.
+                            </p>
+                        </div>
+
+                        <button class="btn" onclick="requestInstagramSync()">
+                            Sync Instagram Saved
+                        </button>
+                    </div>
+
+                    <div id="sync-status" class="muted">Checking sync status...</div>
+
+                    <div class="section" style="margin-top: 16px">
+                        <strong>Local sync agent</strong>
+
+                        <p class="muted">
+                            Keep the local sync agent running while you use the Sync button
+                            above.
+                        </p>
+
+                        <code>
+                python scripts/instagram_saved_sync.py --profile
+                ./local-instagram-profile
+              </code>
+                    </div>
+                </div>
+            </section>
+            <p class="muted" id="toast"></p>
+        </main>
+    </div>
+    <aside id="drawer" class="drawer card hidden">
+        <div class="drawer-head">
+            <h2 id="drawer-title">Item</h2>
+            <button class="btn alt" onclick="closeDrawer()">Close</button>
+        </div>
+        <div id="drawer-body"></div>
+    </aside>
+    <script>
+        const $ = (s) => document.querySelector(s);
+
+        let libraryPage = 1;
+        const LIBRARY_PAGE_SIZE = 50;
+
+        const esc = (x) =>
+            String(x ?? "").replace(
+                /[&<>"']/g,
+                (c) =>
+                    ({
+                        "&": "&amp;",
+                        "<": "&lt;",
+                        ">": "&gt;",
+                        '"': "&quot;",
+                        "'": "&#39;",
+                    })[c],
+            );
+        async function api(url, opt) {
+            try {
+                const r = await fetch(url, opt);
+                const data = await r.json();
+                if (!r.ok) {
+                    return {
+                        success: false,
+                        error: data.error || { message: "Request failed." },
+                    };
+                }
+                return data;
+            } catch (error) {
+                console.error("API request failed:", error);
+                return {
+                    success: false,
+                    error: { message: "Unable to connect to SavedFlow." },
+                };
+            }
+        }
+        const views = {
+            dashboard: "Your saves, in flow.",
+            library: "Your content library",
+            recommendations: "What deserves your attention",
+            implementation: "Ideas to put into practice",
+            review: "Your weekly review",
+            settings: "Settings & connections",
+        };
+        function go(view) {
+            document
+                .querySelectorAll(".view")
+                .forEach((x) => x.classList.toggle("hidden", x.id !== view));
+            document
+                .querySelectorAll("[data-view]")
+                .forEach((x) =>
+                    x.classList.toggle("active", x.dataset.view === view),
+                );
+            $("#page-title").textContent = views[view];
+            if (view === "dashboard") loadDashboard();
+            if (view === "library") loadLibrary();
+            if (view === "recommendations") loadRecommendations();
+            if (view === "implementation") {
+                loadImplementation();
+                loadActions();
+            }
+            if (view === "settings") loadHealth();
+        }
+        document.querySelectorAll("[data-view]").forEach(
+            (x) =>
+            (x.onclick = () => {
+                go(x.dataset.view);
+                closeNav();
+            }),
+        );
+
+        function toggleNav() {
+            const open = document.body.classList.toggle("nav-open");
+            const menuButton = document.querySelector(".mobile-menu-btn");
+            if (menuButton) {
+                menuButton.setAttribute("aria-expanded", String(open));
+            }
+        }
+
+        function closeNav() {
+            document.body.classList.remove("nav-open");
+            const menuButton = document.querySelector(".mobile-menu-btn");
+            if (menuButton) {
+                menuButton.setAttribute("aria-expanded", "false");
+            }
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                closeNav();
+                closeDrawer();
+            }
+        });
+        function badge(i) {
+            let cls =
+                i.recommendation === "SKIP"
+                    ? "bad"
+                    : i.recommendation
+                        ? "good"
+                        : "warn";
+            return `<span class="chip ${cls}">${esc(i.recommendation || "UNRANKED")}</span>`;
+        }
+        function itemCard(i) {
+            let meta = i.source_metadata || {},
+                thumb = meta.thumbnail_url
+                    ? `<img src="${esc(meta.thumbnail_url)}" alt="${esc(meta.visible_label || "Instagram preview")}" style="width:100%;height:145px;object-fit:cover;border-radius:9px;background:#edf0f4" onerror="this.remove()">`
+                    : "";
+            return `<article class="card item">${thumb}<div class="item-title">${esc(i.caption || meta.visible_label || i.creator_username || "Saved Instagram item")}</div><div class="muted">${esc(i.source_method || "MANUAL")} · ${esc(i.media_status || "UNKNOWN")}</div><div class="chips">${badge(i)}<span class="chip">Usefulness ${i.usefulness_score ?? "—"}</span><span class="chip">Dev ${i.development_relevance_score ?? "—"}</span></div><div class="muted">${i.analysis_status === "COMPLETED" ? "AI analyzed" : "Analysis " + String(i.analysis_status || "pending").toLowerCase()} · ${esc(i.status || "UNWATCHED")}</div><div class="item-actions"><button onclick="openItem('${i.id}')">Details</button><button onclick="openInstagram('${esc(i.url)}')">Open Instagram</button><button onclick="plan('${i.id}')">Plan</button><button onclick="watch('${i.id}')">${i.watch_count ? "Watched" : "Mark watched"}</button></div></article>`;
+        }
+        async function loadDashboard() {
+            let d = await api("/api/dashboard");
+            let m = [
+                ["Total saves", d.total_items],
+                ["Unwatched", d.unwatched],
+                ["AI analyzed", d.ai_analyzed],
+                ["Worth implementing", d.worth_implementing],
+                ["Watched", d.watched],
+                ["Pending analysis", d.analysis_pending],
+                ["Applied", d.applied],
+                ["Not useful", d.not_useful],
+            ];
+            $("#metrics").innerHTML = m
+                .map(
+                    (x) =>
+                        `<div class="card metric"><div class="muted">${x[0]}</div><div class="value">${x[1] || 0}</div></div>`,
+                )
+                .join("");
+            let r = await api("/api/recommendations?limit=3");
+            $("#focus").innerHTML =
+                (r.recommendations || []).map((x) => itemCard(x.item)).join("") ||
+                '<div class="card empty">Analyze a few saves to unlock recommendations.</div>';
+            let q = await api("/api/items?page_size=3&sort=created_at");
+            $("#recent").innerHTML =
+                (q.items || []).map(itemCard).join("") ||
+                '<div class="card empty">Your library is ready for its first save.</div>';
+        }
+        async function loadLibrary() {
+            let p = new URLSearchParams({
+                page: libraryPage,
+                page_size: LIBRARY_PAGE_SIZE,
+                sort: $("#sort").value,
+                search: $("#search").value,
+                status: $("#filter-status").value,
+            });
+
+            let d = await api("/api/items?" + p);
+
+            const pagination = d.pagination || {};
+            const total = pagination.total || 0;
+            const pageSize = pagination.page_size || LIBRARY_PAGE_SIZE;
+            const currentPage = pagination.page || libraryPage;
+            const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+            // Protect against a page becoming invalid after filtering/deleting items.
+            if (total > 0 && currentPage > totalPages) {
+                libraryPage = totalPages;
+                return loadLibrary();
+            }
+
+            $("#library-count").textContent = total + " saved items";
+
+            $("#library-cards").innerHTML =
+                (d.items || []).map(itemCard).join("") ||
+                '<div class="card empty">No items match your filters.</div>';
+
+            renderLibraryPagination(currentPage, totalPages, total);
+        }
+        function renderLibraryPagination(currentPage, totalPages, total) {
+            const container = $("#library-pagination");
+
+            if (!container) return;
+
+            if (total === 0 || totalPages <= 1) {
+                container.innerHTML = "";
+                return;
+            }
+
+            container.innerHTML = `
+    <button
+      class="btn alt"
+      onclick="changeLibraryPage(${currentPage - 1})"
+      ${currentPage <= 1 ? "disabled" : ""}
+    >
+      ← Previous
+    </button>
+
+    <span class="page-info">
+      Page ${currentPage} of ${totalPages}
+    </span>
+
+    <button
+      class="btn alt"
+      onclick="changeLibraryPage(${currentPage + 1})"
+      ${currentPage >= totalPages ? "disabled" : ""}
+    >
+      Next →
+    </button>
+  `;
+        }
+        function changeLibraryPage(page) {
+            if (page < 1) return;
+
+            libraryPage = page;
+            loadLibrary();
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+            });
+        }
+        async function loadRecommendations() {
+            let d = await api("/api/recommendations?limit=50");
+            $("#recommendation-cards").innerHTML =
+                (d.recommendations || []).map((x) => itemCard(x.item)).join("") ||
+                '<div class="card empty">No recommendations yet.</div>';
+        }
+        async function loadImplementation() {
+            let d = await api("/api/recommendations/implement?limit=50");
+            $("#implementation-cards").innerHTML =
+                (d.recommendations || []).map((x) => itemCard(x.item)).join("") ||
+                '<div class="card empty">No implementation opportunities yet.</div>';
+        }
+        async function loadActions() {
+            let d = await api("/api/actions");
+            $("#actions-list").innerHTML =
+                (d.actions || [])
+                    .map(
+                        (a) =>
+                            `<div class="card"><b>${esc(a.title)}</b><div class="muted">${esc(a.status)} · ${esc(a.priority)}</div><button class="btn alt" onclick="completeAction('${a.id}')">Complete</button></div>`,
+                    )
+                    .join("") || '<div class="empty">No actions yet.</div>';
+        }
+        async function loadHealth() {
+            let d = await api("/api/health");
+            $("#health-cards").innerHTML = [
+                ["MongoDB", d.database === "connected"],
+                ["Gemini", d.ai_configured],
+                ["Instagram configuration", d.instagram_configured],
+            ]
+                .map(
+                    (x) =>
+                        `<div class="card"><b>${x[0]}</b><span class="chip ${x[1] ? "good" : "bad"}">${x[1] ? "CONNECTED" : "NOT CONFIGURED"}</span></div>`,
+                )
+                .join("");
+        }
+        async function openItem(id) {
+            let d = await api("/api/items/" + id);
+            if (!d.item) return;
+            let i = d.item,
+                m = i.source_metadata || {},
+                thumb = m.thumbnail_url
+                    ? `<img src="${esc(m.thumbnail_url)}" alt="Instagram preview" style="width:100%;max-height:280px;object-fit:cover;border-radius:10px" onerror="this.remove()">`
+                    : "";
+            $("#drawer").classList.remove("hidden");
+            $("#drawer-title").textContent =
+                i.caption || m.visible_label || i.creator_username || "Saved item";
+            $("#drawer-body").innerHTML =
+                `${thumb}<p><a href="${esc(i.url)}" target="_blank">Open on Instagram ↗</a></p><div class="chips">${badge(i)}<span class="chip">${esc(i.status)}</span><span class="chip">Priority ${esc(i.priority)}</span><span class="chip">${esc(i.media_type || "POST")}</span></div><p class="muted">Media: ${esc(i.media_status)} · Analysis: ${esc(i.analysis_status)} · Source: ${esc(i.source_method)}</p><div class="form"><label>Why I saved<br><textarea id="why" rows="2">${esc(i.why_saved)}</textarea></label><br><label>My notes<br><textarea id="notes" rows="3">${esc(i.user_notes)}</textarea></label><br><button class="btn" onclick="saveNotes('${i.id}')">Save notes</button> <button class="btn alt" onclick="plan('${i.id}')">Plan implementation</button> <button class="btn alt" onclick="showAnalysis('${i.id}')">View AI analysis</button> <button class="btn alt" onclick="analyze('${i.id}',${JSON.stringify(Boolean(i.caption || i.user_notes || i.why_saved))})">Analyze</button></div>`;
+        }
+        async function saveNotes(id) {
+            await api("/api/items/" + id, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    why_saved: $("#why").value,
+                    user_notes: $("#notes").value,
+                }),
+            });
+            toast("Notes saved");
+        }
+        async function showAnalysis(id) {
+            $("#drawer").classList.remove("hidden");
+            $("#drawer-body").innerHTML =
+                '<p class="muted">Loading stored Gemini analysis…</p>';
+            let d = await api("/api/items/" + id + "/analysis");
+            if (!d.success) {
+                $("#drawer-body").innerHTML =
+                    '<div class="analysis-warning">No completed analysis yet. The item may still be queued, or only metadata is available.</div>';
+                return;
+            }
+            let a = d.analysis;
+            let warning =
+                a.analysis_basis === "METADATA_ONLY"
+                    ? '<div class="analysis-warning">Metadata-only analysis: no Reel video, transcript, or caption was available. This is not a video summary.</div>'
+                    : "";
+            $("#drawer-title").textContent = "AI analysis";
+            $("#drawer-body").innerHTML =
+                warning +
+                `<div class="analysis-copy"><h3>${esc(a.summary)}</h3><p><b>Core idea:</b> ${esc(a.core_idea)}</p><p><b>Why useful:</b> ${esc(a.why_useful)}</p><p><b>Recommendation:</b> ${esc(a.recommendation)} · <b>Difficulty:</b> ${esc(a.difficulty)}</p><h3>Key takeaways</h3><ul>${(a.key_takeaways || []).map((x) => `<li>${esc(x)}</li>`).join("") || "<li>None available from the supplied content.</li>"}</ul><h3>Actionable steps</h3><ol>${(a.actionable_steps || []).map((x) => `<li>${esc(x)}</li>`).join("") || "<li>None available from the supplied content.</li>"}</ol><p class="muted">Basis: ${esc(a.analysis_basis)}</p></div>`;
+        }
+        async function analyze(id, hasContent = true) {
+            if (!hasContent) {
+                toast(
+                    "No caption, transcript, or notes yet. SavedFlow will not send a URL-only Reel to Gemini.",
+                );
+                return;
+            }
+            let d = await api("/api/items/" + id + "/analyze", { method: "POST" });
+            toast(d.success ? "Analysis queued" : "Could not queue analysis");
+            if (d.success) {
+                showAnalysis(id);
+                poll(id, d.job?.id);
+            }
+        }
+        async function poll(id, job) {
+            if (!job) return;
+            for (let n = 0; n < 30; n++) {
+                await new Promise((r) => setTimeout(r, 1000));
+                let d = await api("/api/jobs/" + job);
+                if (d.job?.status === "COMPLETED") {
+                    showAnalysis(id);
+                    loadDashboard();
+                    return;
+                }
+                if (d.job?.status === "FAILED") {
+                    toast("Analysis failed: " + d.job.error);
+                    return;
+                }
+            }
+            toast("Analysis is still processing");
+        }
+        async function plan(id) {
+            let d = await api("/api/items/" + id + "/apply", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ create_action: true }),
+            });
+            if (d.success) {
+                toast("Added to your implementation queue");
+                go("implementation");
+            } else
+                toast(d.error?.message || "Could not create implementation task");
+        }
+        async function watch(id) {
+            await api("/api/items/" + id + "/watch", { method: "POST" });
+            toast("Marked watched");
+            loadDashboard();
+            loadLibrary();
+        }
+        async function completeAction(id) {
+            await api("/api/actions/" + id, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "COMPLETED" }),
+            });
+            loadActions();
+            loadDashboard();
+        }
+        async function generateReview() {
+            let d = await api("/api/weekly-review", { method: "POST" });
+            $("#review-content").innerHTML =
+                `<p>${esc(d.review?.narrative_summary || "Review generated.")}</p>`;
+        }
+        function openInstagram(url) {
+            window.open(url, "_blank", "noopener");
+        }
+        function closeDrawer() {
+            $("#drawer").classList.add("hidden");
+        }
+        function toast(s) {
+            $("#toast").textContent = s;
+            setTimeout(() => ($("#toast").textContent = ""), 3500);
+        }
+        async function showSync() {
+            await requestInstagramSync();
+        }
+
+        async function requestInstagramSync() {
+            try {
+                const response = await api("/api/instagram/sync/request", {
+                    method: "POST",
+                });
+
+                if (!response.success) {
+                    toast("Could not start Instagram sync.");
+                    return;
+                }
+
+                go("library");
+
+                if (response.already_running) {
+                    toast("Instagram sync is already running.");
+                } else {
+                    toast(
+                        "Sync requested. Your local Instagram sync agent will start it.",
+                    );
+                }
+
+                pollSyncStatus();
+            } catch (error) {
+                toast("Could not request Instagram sync.");
+                console.error(error);
+            }
+        }
+
+        async function pollSyncStatus() {
+            try {
+                const response = await api("/api/import/status");
+
+                const sync = response.sync;
+
+                if (!sync) {
+                    return;
+                }
+
+                const statusElement = $("#sync-status");
+
+                if (statusElement) {
+                    statusElement.textContent = `Instagram sync: ${sync.status}`;
+                }
+
+                if (sync.status === "QUEUED" || sync.status === "RUNNING") {
+                    setTimeout(pollSyncStatus, 2000);
+                } else {
+                    loadLibrary();
+                }
+            } catch (error) {
+                console.error("Unable to check sync status:", error);
+            }
+        }
+        $("#search").oninput = () => {
+            libraryPage = 1;
+            loadLibrary();
+        };
+
+        $("#sort").onchange = () => {
+            libraryPage = 1;
+            loadLibrary();
+        };
+
+        $("#filter-status").onchange = () => {
+            libraryPage = 1;
+            loadLibrary();
+        };
+        loadDashboard();
+    </script>
+</body>
+
+</html>
