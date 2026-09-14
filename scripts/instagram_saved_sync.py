@@ -303,11 +303,13 @@ def run_sync(
                 else context.new_page()
             )
 
+            print("Opening Instagram...")
             page.goto(
                 "https://www.instagram.com/",
                 wait_until="domcontentloaded",
                 timeout=30000,
             )
+            print(f"Instagram opened: {page.url}")
 
             if "/accounts/login" in page.url:
                 if os.environ.get("GITHUB_ACTIONS") == "true":
@@ -319,18 +321,22 @@ def run_sync(
                     "then press Enter here... "
                 )
 
+                print("Opening Saved collection...")
             page.goto(
                 saved_url + "/",
                 wait_until="domcontentloaded",
                 timeout=30000,
             )
+            print(f"Saved collection opened: {page.url}")
 
             status = check_auth(page)
 
             if status != "COMPLETED":
                 items = []
             else:
+                print("Starting item discovery...")
                 items = discover_items(page)
+                print(f"Item discovery finished: {len(items)} items found")
 
             result = {
                 "status": status,
@@ -347,7 +353,7 @@ def run_sync(
                     )
                 )
                 return 0
-
+            print("Sending discovered items to SavedFlow...")
             sync_response = post_json(
                 urljoin(
                     server + "/",
