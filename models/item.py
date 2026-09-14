@@ -8,7 +8,7 @@ from utils.dates import utcnow
 
 MEDIA_STATUSES = {"AVAILABLE", "UNAVAILABLE", "UNKNOWN"}
 ANALYSIS_STATUSES = {"NOT_ANALYZED", "QUEUED", "PROCESSING", "COMPLETED", "FAILED", "NOT_AVAILABLE"}
-ITEM_STATUSES = {"NEW", "WATCHED", "WORTH_TRYING", "APPLIED", "NOT_USEFUL", "ARCHIVED"}
+ITEM_STATUSES = {"UNWATCHED", "WATCHED", "WORTH_TRYING", "APPLIED", "NOT_USEFUL", "ARCHIVED"}
 PRIORITIES = {"LOW", "MEDIUM", "HIGH"}
 SOURCE_METHODS = {"API", "EXPORT", "MANUAL", "LOCAL_BROWSER"}
 RECOMMENDATIONS = {"WATCH_NOW", "WATCH_LATER", "WORTH_IMPLEMENTING", "LOW_VALUE", "SKIP", None}
@@ -40,7 +40,7 @@ def new_item(
         "saved_at": saved_at,
         "source_metadata": source_metadata or {},
         "imported_at": now,
-        "status": "NEW",
+        "status": "UNWATCHED",
         "watched_at": None,
         "watch_count": 0,
         "last_watched_at": None,
