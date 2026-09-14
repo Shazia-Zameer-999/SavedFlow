@@ -279,7 +279,9 @@ def run_sync(
         context = None
 
         try:
+            print("GITHUB_ACTIONS =", repr(os.environ.get("GITHUB_ACTIONS")))
             context = pw.chromium.launch_persistent_context(
+                
                 str(
                     Path(profile_path)
                     .expanduser()
