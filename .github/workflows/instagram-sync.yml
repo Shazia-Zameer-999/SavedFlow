@@ -1,0 +1,36 @@
+name: Instagram Saved Sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install playwright
+          playwright install chromium
+          playwright install-deps chromium
+
+      - name: Run Instagram sync
+        env:
+          SAVEDFLOW_SERVER_URL: ${{ secrets.SAVEDFLOW_SERVER_URL }}
+          INSTAGRAM_SAVED_URL: ${{ secrets.INSTAGRAM_SAVED_URL }}
+          SAVEDFLOW_SYNC_TOKEN: ${{ secrets.SAVEDFLOW_SYNC_TOKEN }}
+        run: |
+          python scripts/instagram_saved_sync.py \
+            --profile ./github-instagram-profile \
+            --once
