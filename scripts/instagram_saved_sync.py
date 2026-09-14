@@ -287,7 +287,7 @@ def run_sync(
                     .expanduser()
                     .resolve()
                 ),
-                headless=os.environ.get("GITHUB_ACTIONS") != "true",
+                headless=os.environ.get("GITHUB_ACTIONS") == "true",
                 accept_downloads=False,
             )
 
