@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SavedFlow</title>
+    <style>
+      :root {
+        --nav: #111827;
+        --bg: #f6f7fb;
+        --card: #fff;
+        --ink: #172033;
+        --muted: #718096;
+        --line: #e5e9f0;
+        --accent: #6758e8;
+        --good: #138a5b;
+        --warn: #b7791f;
+        --bad: #c53030;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        width: 100%;
+        overflow-x: hidden;
+      }
+
+      body {
+        margin: 0;
+        width: 100%;
+        min-width: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          14px/1.5 Inter,
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+
+      .app {
+        display: flex;
+        min-height: 100vh;
+        width: 100%;
+        min-width: 0;
+      }
+
+      /* =========================================
+   SIDEBAR
+   ========================================= */
+
+      .sidebar {
+        position: fixed;
+        width: 240px;
+        inset: 0 auto 0 0;
+        background: var(--nav);
+        color: #bac4d4;
+        padding: 26px 16px;
+        z-index: 3;
+      }
+
+      .logo {
+        font-size: 22px;
+        font-weight: 800;
+        color: #fff;
+        padding: 0 12px 30px;
+        letter-spacing: -0.05em;
+      }
+
+      .logo span {
+        color: #8c80ff;
+      }
+
+      .nav {
+        display: grid;
+        gap: 4px;
+      }
+
+      .nav button {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        border-radius: 9px;
+        padding: 11px 12px;
+        cursor: pointer;
+      }
+
+      .nav button:hover,
+      .nav button.active {
+        background: #273149;
+        color: #fff;
+      }
+
+      /* =========================================
+   MAIN CONTENT
+   ========================================= */
+
+      /*
+  IMPORTANT FIX:
+  The old width:100% combined with margin-left:240px
+  could make the main area wider than the viewport.
+
+  flex: 1 allows the main area to occupy only the
+  remaining space beside the fixed sidebar.
+*/
+
+      .main {
+        flex: 1;
+        min-width: 0;
+        width: auto;
+        max-width: none;
+        margin-left: 240px;
+        padding: 30px 4vw;
+      }
+
+      /* =========================================
+   TOP HEADER
+   ========================================= */
+
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 28px;
+      }
+
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.13em;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .title {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        margin-top: 2px;
+      }
+
+      /* =========================================
+   BUTTONS
+   ========================================= */
+
+      .btn {
+        border: 0;
+        background: var(--accent);
+        color: #fff;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-weight: 750;
+        cursor: pointer;
+      }
+
+      .btn.alt {
+        background: #fff;
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+
+      .btn.danger {
+        color: var(--bad);
+      }
+
+      /* =========================================
+   VIEWS
+   ========================================= */
+
+      .view.hidden {
+        display: none;
+      }
+
+      /* =========================================
+   METRIC CARDS
+   ========================================= */
+
+      .metrics {
+        display: grid;
+
+        /*
+    minmax(0, 1fr) is the important part.
+    It allows each metric card to shrink properly
+    instead of pushing the fourth card outside
+    the viewport.
+  */
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+
+        gap: 14px;
+        width: 100%;
+      }
+
+      .metric {
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      /* =========================================
+   GENERAL CARD
+   ========================================= */
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: 0 7px 24px #17203308;
+
+        /*
+    Prevent card content from forcing the grid
+    wider than its available space.
+  */
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      /* =========================================
+   METRIC CONTENT
+   ========================================= */
+
+      .metric .value {
+        font-size: 28px;
+        font-weight: 850;
+        margin-top: 4px;
+        min-width: 0;
+      }
+
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      /* =========================================
+   SECTIONS
+   ========================================= */
+
+      .section {
+        margin-top: 30px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .section h2 {
+        font-size: 18px;
+        letter-spacing: -0.03em;
+        margin: 0;
+      }
+
+      /* =========================================
+   CONTENT CARD GRID
+   ========================================= */
+
+      .cards {
+        display: grid;
+
+        /*
+    This is the main card overflow fix.
+  */
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+
+        gap: 14px;
+        width: 100%;
+        min-width: 0;
+      }
+
+      /*
+  Grid children must be allowed to shrink.
+*/
+      .cards > * {
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      /* =========================================
+   ITEM CARDS
+   ========================================= */
+
+      .item {
+        min-width: 0;
+        max-width: 100%;
+        min-height: 210px;
+
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+
+        /*
+    Prevent long content/images from visually
+    escaping the rounded card.
+  */
+        overflow: hidden;
+      }
+
+      /*
+  The existing JavaScript puts inline dimensions
+  on images, so we preserve those dimensions.
+  These rules simply make sure the image cannot
+  exceed the card itself.
+*/
+
+      .item img {
+        display: block;
+        max-width: 100%;
+        border-radius: 9px;
+      }
+
+      /* =========================================
+   ITEM TITLE
+   ========================================= */
+
+      .item-title {
+        /*
+    Critical for CSS Grid:
+    allows long titles to shrink within
+    their grid column.
+  */
+        min-width: 0;
+        max-width: 100%;
+
+        font-weight: 800;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* =========================================
+   CHIPS
+   ========================================= */
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      .chip {
+        display: inline-flex;
+        min-width: 0;
+        max-width: 100%;
+
+        border-radius: 99px;
+        padding: 3px 8px;
+        background: #eeecff;
+        color: #5648d7;
+        font-size: 11px;
+        font-weight: 750;
+      }
+
+      .chip.good {
+        background: #e5f6ed;
+        color: var(--good);
+      }
+
+      .chip.warn {
+        background: #fff5df;
+        color: var(--warn);
+      }
+
+      .chip.bad {
+        background: #ffebeb;
+        color: var(--bad);
+      }
+
+      /* =========================================
+   ITEM ACTIONS
+   ========================================= */
+
+      .item-actions {
+        display: flex;
+        gap: 7px;
+        margin-top: auto;
+        flex-wrap: wrap;
+
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      .item-actions button {
+        border: 0;
+        background: #f0f2f6;
+        color: #3c4655;
+        border-radius: 7px;
+        padding: 7px 9px;
+        font-size: 12px;
+        cursor: pointer;
+
+        /*
+    Prevent buttons from forcing the card wider.
+  */
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      /* =========================================
+   TOOLBAR
+   ========================================= */
+
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+
+      .toolbar input,
+      .toolbar select,
+      .form input,
+      .form textarea,
+      .form select {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 9px 11px;
+        background: #fff;
+        color: var(--ink);
+      }
+
+      .toolbar input {
+        min-width: 270px;
+      }
+
+      /* =========================================
+   EMPTY STATE
+   ========================================= */
+
+      .empty {
+        text-align: center;
+        color: var(--muted);
+        padding: 32px;
+      }
+
+      /* =========================================
+   HEALTH / REVIEW
+   ========================================= */
+
+      .health,
+      .review-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      /* =========================================
+   DRAWER
+   ========================================= */
+
+      .drawer {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+
+        width: min(650px, calc(100vw - 40px));
+
+        max-height: 82vh;
+        overflow: auto;
+        z-index: 5;
+
+        min-width: 0;
+      }
+
+      .drawer.hidden {
+        display: none;
+      }
+
+      .drawer-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .analysis-copy h3 {
+        margin-bottom: 5px;
+      }
+
+      .analysis-copy ul,
+      .analysis-copy ol {
+        padding-left: 22px;
+      }
+
+      .analysis-warning {
+        padding: 11px;
+        border-radius: 8px;
+        background: #fff5df;
+        color: #805b15;
+        margin: 10px 0;
+      }
+
+      /* =========================================
+   PROGRESS
+   ========================================= */
+
+      .progress {
+        height: 8px;
+        background: #edf0f4;
+        border-radius: 99px;
+        overflow: hidden;
+      }
+
+      .progress i {
+        display: block;
+        height: 100%;
+        background: var(--accent);
+      }
+
+      /* =========================================
+   RESPONSIVE — TABLET / SMALL DESKTOP
+   ========================================= */
+
+      @media (max-width: 1200px) {
+        /*
+    Keep the same visual style, but reduce the
+    number of columns before they become cramped.
+  */
+
+        .metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .cards {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      /* =========================================
+   RESPONSIVE — 900px
+   ========================================= */
+
+      @media (max-width: 900px) {
+        .sidebar {
+          width: 72px;
+          padding: 18px 8px;
+        }
+
+        .logo {
+          font-size: 0;
+        }
+
+        .logo span {
+          font-size: 21px;
+        }
+
+        .nav button {
+          font-size: 0;
+          text-align: center;
+        }
+
+        .nav button:first-letter {
+          font-size: 19px;
+        }
+
+        .main {
+          margin-left: 72px;
+          padding: 24px 4vw;
+        }
+
+        .metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .cards {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .health,
+        .review-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* =========================================
+   RESPONSIVE — MOBILE
+   ========================================= */
+
+      @media (max-width: 550px) {
+        .cards {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .top {
+          flex-direction: column;
+        }
+
+        .metrics {
+          gap: 9px;
+        }
+
+        .toolbar input {
+          min-width: 100%;
+        }
+
+        /*
+    Prevent toolbar controls from creating
+    horizontal overflow on narrow screens.
+  */
+
+        .toolbar {
+          max-width: 100%;
+        }
+
+        .toolbar input,
+        .toolbar select,
+        .toolbar button {
+          max-width: 100%;
+        }
+
+        /*
+    Keep action buttons wrapping naturally.
+  */
+
+        .item-actions {
+          width: 100%;
+        }
+      }
+
+      /* =========================================
+   VERY SMALL MOBILE SAFETY
+   ========================================= */
+
+      @media (max-width: 380px) {
+        .main {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+
+        .card {
+          padding: 14px;
+        }
+
+        .title {
+          font-size: 27px;
+        }
+
+        .item-actions button {
+          font-size: 11px;
+          padding: 7px 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="logo">Saved<span>Flow</span></div>
+        <nav class="nav">
+          <button class="active" data-view="dashboard">◈ &nbsp;Dashboard</button
+          ><button data-view="library">▦ &nbsp;Library</button
+          ><button data-view="recommendations">✦ &nbsp;Recommendations</button
+          ><button data-view="implementation">✓ &nbsp;Implementation</button
+          ><button data-view="review">◷ &nbsp;Weekly Review</button
+          ><button data-view="settings">⚙ &nbsp;Settings</button>
+        </nav>
+      </aside>
+      <main class="main">
+        <header class="top">
+          <div>
+            <div class="eyebrow">Personal knowledge base</div>
+            <div class="title" id="page-title">Your saves, in flow.</div>
+          </div>
+          <button class="btn" onclick="showSync()">Sync Instagram Saved</button>
+        </header>
+        <section id="dashboard" class="view">
+          <div class="metrics" id="metrics"></div>
+          <div class="section">
+            <div class="section-head">
+              <h2>Today’s focus</h2>
+              <button class="btn alt" onclick="go('recommendations')">
+                View all
+              </button>
+            </div>
+            <div class="cards" id="focus"></div>
+          </div>
+          <div class="section">
+            <h2>Recently saved</h2>
+            <div class="cards" id="recent"></div>
+          </div>
+        </section>
+        <section id="library" class="view hidden">
+          <div class="toolbar">
+            <input
+              id="search"
+              placeholder="Search captions, creators, notes"
+            /><select id="sort">
+              <option value="created_at">Newest</option>
+              <option value="usefulness">Usefulness</option>
+              <option value="development_relevance">
+                Development relevance
+              </option></select
+            ><select id="filter-status">
+              <option value="">All statuses</option>
+              <option>NEW</option>
+              <option>WATCHED</option>
+              <option>APPLIED</option>
+              <option>NOT_USEFUL</option>
+              <option>ARCHIVED</option></select
+            ><button class="btn alt" onclick="loadLibrary()">Refresh</button>
+          </div>
+          <div class="muted" id="library-count"></div>
+          <div class="cards" id="library-cards"></div>
+        </section>
+        <section id="recommendations" class="view hidden">
+          <div class="section-head">
+            <h2>Recommendations for you</h2>
+            <span class="muted">Based on analysis and your activity</span>
+          </div>
+          <div class="cards" id="recommendation-cards"></div>
+        </section>
+        <section id="implementation" class="view hidden">
+          <div class="section-head">
+            <h2>Implementation queue</h2>
+            <button class="btn alt" onclick="loadActions()">Refresh</button>
+          </div>
+          <div class="cards" id="implementation-cards"></div>
+          <div class="section">
+            <h2>Actions</h2>
+            <div id="actions-list"></div>
+          </div>
+        </section>
+        <section id="review" class="view hidden">
+          <div class="card">
+            <div class="section-head">
+              <h2>Weekly review</h2>
+              <button class="btn" onclick="generateReview()">
+                Generate review
+              </button>
+            </div>
+            <div id="review-content" class="empty">
+              A grounded review is generated from your real activity.
+            </div>
+          </div>
+        </section>
+        <section id="settings" class="view hidden">
+          <div class="health" id="health-cards"></div>
+          <div class="card section">
+            <h2>Local Instagram sync</h2>
+            <p class="muted">
+              Run the visible Playwright helper locally. Your password, cookies,
+              and browser session never go to Flask or Gemini.
+            </p>
+            <code>
+            python scripts/instagram_saved_sync.py --profile ./local-instagram-profile --saved-url "https://www.instagram.com/shaziazameer.dev/saved/all-posts/" --server "http://127.0.0.1:5001"</code
+            >
+          </div>
+        </section>
+        <p class="muted" id="toast"></p>
+      </main>
+    </div>
+    <aside id="drawer" class="drawer card hidden">
+      <div class="drawer-head">
+        <h2 id="drawer-title">Item</h2>
+        <button class="btn alt" onclick="closeDrawer()">Close</button>
+      </div>
+      <div id="drawer-body"></div>
+    </aside>
+    <script>
+      const $ = (s) => document.querySelector(s),
+        esc = (x) =>
+          String(x ?? "").replace(
+            /[&<>"']/g,
+            (c) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+              })[c],
+          );
+      async function api(url, opt) {
+        const r = await fetch(url, opt);
+        return r.json();
+      }
+      const views = {
+        dashboard: "Your saves, in flow.",
+        library: "Your content library",
+        recommendations: "What deserves your attention",
+        implementation: "Ideas to put into practice",
+        review: "Your weekly review",
+        settings: "Settings & connections",
+      };
+      function go(view) {
+        document
+          .querySelectorAll(".view")
+          .forEach((x) => x.classList.toggle("hidden", x.id !== view));
+        document
+          .querySelectorAll("[data-view]")
+          .forEach((x) =>
+            x.classList.toggle("active", x.dataset.view === view),
+          );
+        $("#page-title").textContent = views[view];
+        if (view === "dashboard") loadDashboard();
+        if (view === "library") loadLibrary();
+        if (view === "recommendations") loadRecommendations();
+        if (view === "implementation") {
+          loadImplementation();
+          loadActions();
+        }
+        if (view === "settings") loadHealth();
+      }
+      document
+        .querySelectorAll("[data-view]")
+        .forEach((x) => (x.onclick = () => go(x.dataset.view)));
+      function badge(i) {
+        let cls =
+          i.recommendation === "SKIP"
+            ? "bad"
+            : i.recommendation
+              ? "good"
+              : "warn";
+        return `<span class="chip ${cls}">${esc(i.recommendation || "UNRANKED")}</span>`;
+      }
+      function itemCard(i) {
+        let meta = i.source_metadata || {},
+          thumb = meta.thumbnail_url
+            ? `<img src="${esc(meta.thumbnail_url)}" alt="${esc(meta.visible_label || "Instagram preview")}" style="width:100%;height:145px;object-fit:cover;border-radius:9px;background:#edf0f4" onerror="this.remove()">`
+            : "";
+        return `<article class="card item">${thumb}<div class="item-title">${esc(i.caption || meta.visible_label || i.creator_username || "Saved Instagram item")}</div><div class="muted">${esc(i.source_method || "MANUAL")} · ${esc(i.media_status || "UNKNOWN")}</div><div class="chips">${badge(i)}<span class="chip">Usefulness ${i.usefulness_score ?? "—"}</span><span class="chip">Dev ${i.development_relevance_score ?? "—"}</span></div><div class="muted">${i.analysis_status === "COMPLETED" ? "AI analyzed" : "Analysis " + String(i.analysis_status || "pending").toLowerCase()} · ${esc(i.status || "NEW")}</div><div class="item-actions"><button onclick="openItem('${i.id}')">Details</button><button onclick="openInstagram('${esc(i.url)}')">Open Instagram</button><button onclick="plan('${i.id}')">Plan</button><button onclick="watch('${i.id}')">${i.watch_count ? "Watched" : "Mark watched"}</button></div></article>`;
+      }
+      async function loadDashboard() {
+        let d = await api("/api/dashboard");
+        let m = [
+          ["Total saves", d.total_items],
+          ["Unwatched", d.unwatched],
+          ["AI analyzed", d.ai_analyzed],
+          ["Worth implementing", d.worth_implementing],
+          ["Watched", d.watched],
+          ["Pending analysis", d.analysis_pending],
+          ["Applied", d.applied],
+          ["Not useful", d.not_useful],
+        ];
+        $("#metrics").innerHTML = m
+          .map(
+            (x) =>
+              `<div class="card metric"><div class="muted">${x[0]}</div><div class="value">${x[1] || 0}</div></div>`,
+          )
+          .join("");
+        let r = await api("/api/recommendations?limit=3");
+        $("#focus").innerHTML =
+          (r.recommendations || []).map((x) => itemCard(x.item)).join("") ||
+          '<div class="card empty">Analyze a few saves to unlock recommendations.</div>';
+        let q = await api("/api/items?page_size=3&sort=created_at");
+        $("#recent").innerHTML =
+          (q.items || []).map(itemCard).join("") ||
+          '<div class="card empty">Your library is ready for its first save.</div>';
+      }
+      async function loadLibrary() {
+        let p = new URLSearchParams({
+          page_size: 50,
+          sort: $("#sort").value,
+          search: $("#search").value,
+          status: $("#filter-status").value,
+        });
+        let d = await api("/api/items?" + p);
+        $("#library-count").textContent =
+          (d.pagination?.total || 0) + " saved items";
+        $("#library-cards").innerHTML =
+          (d.items || []).map(itemCard).join("") ||
+          '<div class="card empty">No items match your filters.</div>';
+      }
+      async function loadRecommendations() {
+        let d = await api("/api/recommendations?limit=50");
+        $("#recommendation-cards").innerHTML =
+          (d.recommendations || []).map((x) => itemCard(x.item)).join("") ||
+          '<div class="card empty">No recommendations yet.</div>';
+      }
+      async function loadImplementation() {
+        let d = await api("/api/recommendations/implement?limit=50");
+        $("#implementation-cards").innerHTML =
+          (d.recommendations || []).map((x) => itemCard(x.item)).join("") ||
+          '<div class="card empty">No implementation opportunities yet.</div>';
+      }
+      async function loadActions() {
+        let d = await api("/api/actions");
+        $("#actions-list").innerHTML =
+          (d.actions || [])
+            .map(
+              (a) =>
+                `<div class="card"><b>${esc(a.title)}</b><div class="muted">${esc(a.status)} · ${esc(a.priority)}</div><button class="btn alt" onclick="completeAction('${a.id}')">Complete</button></div>`,
+            )
+            .join("") || '<div class="empty">No actions yet.</div>';
+      }
+      async function loadHealth() {
+        let d = await api("/api/health");
+        $("#health-cards").innerHTML = [
+          ["MongoDB", d.database === "connected"],
+          ["Gemini", d.ai_configured],
+          ["Instagram configuration", d.instagram_configured],
+        ]
+          .map(
+            (x) =>
+              `<div class="card"><b>${x[0]}</b><span class="chip ${x[1] ? "good" : "bad"}">${x[1] ? "CONNECTED" : "NOT CONFIGURED"}</span></div>`,
+          )
+          .join("");
+      }
+      async function openItem(id) {
+        let d = await api("/api/items/" + id);
+        if (!d.item) return;
+        let i = d.item,
+          m = i.source_metadata || {},
+          thumb = m.thumbnail_url
+            ? `<img src="${esc(m.thumbnail_url)}" alt="Instagram preview" style="width:100%;max-height:280px;object-fit:cover;border-radius:10px" onerror="this.remove()">`
+            : "";
+        $("#drawer").classList.remove("hidden");
+        $("#drawer-title").textContent =
+          i.caption || m.visible_label || i.creator_username || "Saved item";
+        $("#drawer-body").innerHTML =
+          `${thumb}<p><a href="${esc(i.url)}" target="_blank">Open on Instagram ↗</a></p><div class="chips">${badge(i)}<span class="chip">${esc(i.status)}</span><span class="chip">Priority ${esc(i.priority)}</span><span class="chip">${esc(i.media_type || "POST")}</span></div><p class="muted">Media: ${esc(i.media_status)} · Analysis: ${esc(i.analysis_status)} · Source: ${esc(i.source_method)}</p><div class="form"><label>Why I saved<br><textarea id="why" rows="2">${esc(i.why_saved)}</textarea></label><br><label>My notes<br><textarea id="notes" rows="3">${esc(i.user_notes)}</textarea></label><br><button class="btn" onclick="saveNotes('${i.id}')">Save notes</button> <button class="btn alt" onclick="plan('${i.id}')">Plan implementation</button> <button class="btn alt" onclick="showAnalysis('${i.id}')">View AI analysis</button> <button class="btn alt" onclick="analyze('${i.id}',${JSON.stringify(Boolean(i.caption || i.user_notes || i.why_saved))})">Analyze</button></div>`;
+      }
+      async function saveNotes(id) {
+        await api("/api/items/" + id, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            why_saved: $("#why").value,
+            user_notes: $("#notes").value,
+          }),
+        });
+        toast("Notes saved");
+      }
+      async function showAnalysis(id) {
+        $("#drawer").classList.remove("hidden");
+        $("#drawer-body").innerHTML =
+          '<p class="muted">Loading stored Gemini analysis…</p>';
+        let d = await api("/api/items/" + id + "/analysis");
+        if (!d.success) {
+          $("#drawer-body").innerHTML =
+            '<div class="analysis-warning">No completed analysis yet. The item may still be queued, or only metadata is available.</div>';
+          return;
+        }
+        let a = d.analysis;
+        let warning =
+          a.analysis_basis === "METADATA_ONLY"
+            ? '<div class="analysis-warning">Metadata-only analysis: no Reel video, transcript, or caption was available. This is not a video summary.</div>'
+            : "";
+        $("#drawer-title").textContent = "AI analysis";
+        $("#drawer-body").innerHTML =
+          warning +
+          `<div class="analysis-copy"><h3>${esc(a.summary)}</h3><p><b>Core idea:</b> ${esc(a.core_idea)}</p><p><b>Why useful:</b> ${esc(a.why_useful)}</p><p><b>Recommendation:</b> ${esc(a.recommendation)} · <b>Difficulty:</b> ${esc(a.difficulty)}</p><h3>Key takeaways</h3><ul>${(a.key_takeaways || []).map((x) => `<li>${esc(x)}</li>`).join("") || "<li>None available from the supplied content.</li>"}</ul><h3>Actionable steps</h3><ol>${(a.actionable_steps || []).map((x) => `<li>${esc(x)}</li>`).join("") || "<li>None available from the supplied content.</li>"}</ol><p class="muted">Basis: ${esc(a.analysis_basis)}</p></div>`;
+      }
+      async function analyze(id, hasContent = true) {
+        if (!hasContent) {
+          toast(
+            "No caption, transcript, or notes yet. SavedFlow will not send a URL-only Reel to Gemini.",
+          );
+          return;
+        }
+        let d = await api("/api/items/" + id + "/analyze", { method: "POST" });
+        toast(d.success ? "Analysis queued" : "Could not queue analysis");
+        if (d.success) {
+          showAnalysis(id);
+          poll(id, d.job?.id);
+        }
+      }
+      async function poll(id, job) {
+        if (!job) return;
+        for (let n = 0; n < 30; n++) {
+          await new Promise((r) => setTimeout(r, 1000));
+          let d = await api("/api/jobs/" + job);
+          if (d.job?.status === "COMPLETED") {
+            showAnalysis(id);
+            loadDashboard();
+            return;
+          }
+          if (d.job?.status === "FAILED") {
+            toast("Analysis failed: " + d.job.error);
+            return;
+          }
+        }
+        toast("Analysis is still processing");
+      }
+      async function plan(id) {
+        let d = await api("/api/items/" + id + "/apply", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ create_action: true }),
+        });
+        if (d.success) {
+          toast("Added to your implementation queue");
+          go("implementation");
+        } else
+          toast(d.error?.message || "Could not create implementation task");
+      }
+      async function watch(id) {
+        await api("/api/items/" + id + "/watch", { method: "POST" });
+        toast("Marked watched");
+        loadDashboard();
+        loadLibrary();
+      }
+      async function completeAction(id) {
+        await api("/api/actions/" + id, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "COMPLETED" }),
+        });
+        loadActions();
+        loadDashboard();
+      }
+      async function generateReview() {
+        let d = await api("/api/weekly-review", { method: "POST" });
+        $("#review-content").innerHTML =
+          `<p>${esc(d.review?.narrative_summary || "Review generated.")}</p>`;
+      }
+      function openInstagram(url) {
+        window.open(url, "_blank", "noopener");
+      }
+      function closeDrawer() {
+        $("#drawer").classList.add("hidden");
+      }
+      function toast(s) {
+        $("#toast").textContent = s;
+        setTimeout(() => ($("#toast").textContent = ""), 3500);
+      }
+      function showSync() {
+        go("settings");
+        toast(
+          "Run the local sync helper shown in Settings; it keeps Instagram authentication on this computer.",
+        );
+      }
+      $("#search").oninput = loadLibrary;
+      $("#sort").onchange = loadLibrary;
+      $("#filter-status").onchange = loadLibrary;
+      loadDashboard();
+    </script>
+  </body>
+</html>
