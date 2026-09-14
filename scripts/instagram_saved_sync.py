@@ -280,16 +280,22 @@ def run_sync(
 
         try:
             print("GITHUB_ACTIONS =", repr(os.environ.get("GITHUB_ACTIONS")))
-            context = pw.chromium.launch_persistent_context(
-                
-                str(
-                    Path(profile_path)
-                    .expanduser()
-                    .resolve()
-                ),
-                headless=os.environ.get("GITHUB_ACTIONS") == "true",
-                accept_downloads=False,
-            )
+            if os.environ.get("GITHUB_ACTIONS") == "true":
+                browser = pw.chromium.launch(headless=True)
+                context = browser.new_context(
+                    storage_state="instagram-state.json",
+                    accept_downloads=False,
+                )
+            else:
+                context = pw.chromium.launch_persistent_context(
+                    str(
+                        Path(profile_path)
+                        .expanduser()
+                        .resolve()
+                    ),
+                    headless=False,
+                    accept_downloads=False,
+                )
 
             page = (
                 context.pages[0]
@@ -380,6 +386,8 @@ def run_sync(
         finally:
             if context:
                 context.close()
+            if os.environ.get("GITHUB_ACTIONS") == "true":
+                browser.close()
 
 
 def process_pending_job(

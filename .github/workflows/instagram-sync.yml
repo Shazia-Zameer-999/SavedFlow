@@ -24,6 +24,12 @@ jobs:
           pip install playwright
           playwright install chromium
           playwright install-deps chromium
+      - name: Restore Instagram session
+        env:
+          INSTAGRAM_SESSION_STATE: ${{ secrets.INSTAGRAM_SESSION_STATE }}
+        run: |
+          echo "$INSTAGRAM_SESSION_STATE" | base64 --decode > instagram-state.json
+        
 
       - name: Run Instagram sync
         env:
