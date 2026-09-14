@@ -285,7 +285,7 @@ def run_sync(
                     .expanduser()
                     .resolve()
                 ),
-                headless=False,
+                headless=os.environ.get("GITHUB_ACTIONS") != "true",
                 accept_downloads=False,
             )
 
@@ -302,6 +302,10 @@ def run_sync(
             )
 
             if "/accounts/login" in page.url:
+                if os.environ.get("GITHUB_ACTIONS") == "true":
+                    print("Instagram login required on GitHub runner.")
+                    return 2
+
                 input(
                     "Log in to Instagram in the visible browser, "
                     "then press Enter here... "
