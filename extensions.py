@@ -29,11 +29,7 @@ def init_db(app):
 
     try:
         _create_indexes(_db)
-    except Exception as exc:  # noqa: BLE001
-        # Index creation requires a reachable MongoDB. If one isn't running
-        # yet (e.g. app imported before `mongod` is started), don't crash
-        # app startup - /api/health will still correctly report the
-        # database as disconnected until it becomes reachable.
+    except Exception as exc: 
         app.logger.warning("Could not create MongoDB indexes at startup: %s", exc)
 
     return _db
@@ -59,18 +55,12 @@ def check_connection():
 
 
 def _create_indexes(db):
-    """Create all indexes needed by SavedFlow's collections (section 38)."""
     items = db.instagram_items
-    # Earlier versions lower-cased shortcodes. Repair existing records so the
-    # internal dedup key keeps the real, case-sensitive Instagram identifier.
+
     for item in items.find({"url": {"$type": "string"}}):
         normalized = normalize_instagram_url(item["url"])
         if normalized and item.get("normalized_url") != normalized:
             items.update_one({"_id": item["_id"]}, {"$set": {"normalized_url": normalized}})
-    # `permalink` belonged to an older schema. A non-sparse unique index on
-    # that field allows just one document without a permalink, which blocks
-    # all local-browser imports. SavedFlow's canonical uniqueness key is
-    # `normalized_url`, so this obsolete index must not survive upgrades.
     try:
         items.drop_index("permalink_1")
     except Exception:
@@ -107,3 +97,5 @@ def _create_indexes(db):
     db.user_preferences.create_index("topic", unique=True)
 
     db.weekly_reviews.create_index("created_at")
+    db.sync_jobs.create_index("status")
+    db.sync_jobs.create_index("created_at")

@@ -1,9 +1,3 @@
-"""
-SavedFlow Flask application factory + entrypoint.
-
-Run with:
-    python app.py
-"""
 from flask import Flask, render_template
 
 from config import Config
@@ -48,4 +42,4 @@ def create_app(config_object=None):
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5002)

@@ -515,6 +515,46 @@
         height: 100%;
         background: var(--accent);
       }
+      /* =========================================
+   LIBRARY PAGINATION
+   ========================================= */
+
+.library-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 8px 0;
+  flex-wrap: wrap;
+}
+
+.library-pagination .page-info {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.library-pagination button {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  min-width: 84px;
+}
+
+.library-pagination button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.library-pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 
       /* =========================================
    RESPONSIVE — TABLET / SMALL DESKTOP
@@ -601,6 +641,19 @@
         .toolbar input {
           min-width: 100%;
         }
+        .library-pagination {
+  gap: 8px;
+}
+
+.library-pagination button {
+  flex: 1;
+  min-width: 0;
+}
+
+.library-pagination .page-info {
+  width: 100%;
+  order: -1;
+}
 
         /*
     Prevent toolbar controls from creating
@@ -710,6 +763,7 @@
           </div>
           <div class="muted" id="library-count"></div>
           <div class="cards" id="library-cards"></div>
+          <div class="library-pagination" id="library-pagination"></div>
         </section>
         <section id="recommendations" class="view hidden">
           <div class="section-head">
@@ -743,18 +797,42 @@
           </div>
         </section>
         <section id="settings" class="view hidden">
-          <div class="health" id="health-cards"></div>
-          <div class="card section">
-            <h2>Local Instagram sync</h2>
-            <p class="muted">
-              Run the visible Playwright helper locally. Your password, cookies,
-              and browser session never go to Flask or Gemini.
-            </p>
-            <code>
-            python scripts/instagram_saved_sync.py --profile ./local-instagram-profile --saved-url "https://www.instagram.com/shaziazameer.dev/saved/all-posts/" --server "http://127.0.0.1:5001"</code
-            >
-          </div>
-        </section>
+  <div class="health" id="health-cards"></div>
+
+  <div class="card section">
+    <div class="section-head">
+      <div>
+        <h2>Instagram Saved sync</h2>
+        <p class="muted">
+          Sync your Saved collection through the local browser agent.
+          Your Instagram password, cookies, and browser session stay
+          on this computer.
+        </p>
+      </div>
+
+      <button class="btn" onclick="requestInstagramSync()">
+        Sync Instagram Saved
+      </button>
+    </div>
+
+    <div id="sync-status" class="muted">
+      Checking sync status...
+    </div>
+
+    <div class="section" style="margin-top: 16px;">
+      <strong>Local sync agent</strong>
+
+      <p class="muted">
+        Keep the local sync agent running while you use the
+        Sync button above.
+      </p>
+
+      <code>
+        python scripts/instagram_saved_sync.py --profile ./local-instagram-profile
+      </code>
+    </div>
+  </div>
+</section>
         <p class="muted" id="toast"></p>
       </main>
     </div>
@@ -766,19 +844,23 @@
       <div id="drawer-body"></div>
     </aside>
     <script>
-      const $ = (s) => document.querySelector(s),
-        esc = (x) =>
-          String(x ?? "").replace(
-            /[&<>"']/g,
-            (c) =>
-              ({
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#39;",
-              })[c],
-          );
+      const $ = (s) => document.querySelector(s);
+
+let libraryPage = 1;
+const LIBRARY_PAGE_SIZE = 50;
+
+const esc = (x) =>
+  String(x ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[c],
+  );
       async function api(url, opt) {
         const r = await fetch(url, opt);
         return r.json();
@@ -857,19 +939,80 @@
           '<div class="card empty">Your library is ready for its first save.</div>';
       }
       async function loadLibrary() {
-        let p = new URLSearchParams({
-          page_size: 50,
-          sort: $("#sort").value,
-          search: $("#search").value,
-          status: $("#filter-status").value,
-        });
-        let d = await api("/api/items?" + p);
-        $("#library-count").textContent =
-          (d.pagination?.total || 0) + " saved items";
-        $("#library-cards").innerHTML =
-          (d.items || []).map(itemCard).join("") ||
-          '<div class="card empty">No items match your filters.</div>';
-      }
+  let p = new URLSearchParams({
+    page: libraryPage,
+    page_size: LIBRARY_PAGE_SIZE,
+    sort: $("#sort").value,
+    search: $("#search").value,
+    status: $("#filter-status").value,
+  });
+
+  let d = await api("/api/items?" + p);
+
+  const pagination = d.pagination || {};
+  const total = pagination.total || 0;
+  const pageSize = pagination.page_size || LIBRARY_PAGE_SIZE;
+  const currentPage = pagination.page || libraryPage;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  // Protect against a page becoming invalid after filtering/deleting items.
+  if (total > 0 && currentPage > totalPages) {
+    libraryPage = totalPages;
+    return loadLibrary();
+  }
+
+  $("#library-count").textContent =
+    total + " saved items";
+
+  $("#library-cards").innerHTML =
+    (d.items || []).map(itemCard).join("") ||
+    '<div class="card empty">No items match your filters.</div>';
+
+  renderLibraryPagination(currentPage, totalPages, total);
+}
+function renderLibraryPagination(currentPage, totalPages, total) {
+  const container = $("#library-pagination");
+
+  if (!container) return;
+
+  if (total === 0 || totalPages <= 1) {
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML = `
+    <button
+      class="btn alt"
+      onclick="changeLibraryPage(${currentPage - 1})"
+      ${currentPage <= 1 ? "disabled" : ""}
+    >
+      ← Previous
+    </button>
+
+    <span class="page-info">
+      Page ${currentPage} of ${totalPages}
+    </span>
+
+    <button
+      class="btn alt"
+      onclick="changeLibraryPage(${currentPage + 1})"
+      ${currentPage >= totalPages ? "disabled" : ""}
+    >
+      Next →
+    </button>
+  `;
+}
+function changeLibraryPage(page) {
+  if (page < 1) return;
+
+  libraryPage = page;
+  loadLibrary();
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}
       async function loadRecommendations() {
         let d = await api("/api/recommendations?limit=50");
         $("#recommendation-cards").innerHTML =
@@ -1023,15 +1166,98 @@
         $("#toast").textContent = s;
         setTimeout(() => ($("#toast").textContent = ""), 3500);
       }
-      function showSync() {
-        go("settings");
-        toast(
-          "Run the local sync helper shown in Settings; it keeps Instagram authentication on this computer.",
-        );
-      }
-      $("#search").oninput = loadLibrary;
-      $("#sort").onchange = loadLibrary;
-      $("#filter-status").onchange = loadLibrary;
+      async function showSync() {
+  await requestInstagramSync();
+}
+
+
+async function requestInstagramSync() {
+  try {
+    const response = await api(
+      "/api/instagram/sync/request",
+      {
+        method: "POST",
+      },
+    );
+
+    if (!response.success) {
+      toast("Could not start Instagram sync.");
+      return;
+    }
+
+    go("library");
+
+    if (response.already_running) {
+      toast("Instagram sync is already running.");
+    } else {
+      toast(
+        "Sync requested. Your local Instagram sync agent will start it.",
+      );
+    }
+
+    pollSyncStatus();
+
+  } catch (error) {
+    toast(
+      "Could not request Instagram sync.",
+    );
+    console.error(error);
+  }
+}
+
+
+async function pollSyncStatus() {
+  try {
+    const response = await api(
+      "/api/import/status",
+    );
+
+    const sync = response.sync;
+
+    if (!sync) {
+      return;
+    }
+
+    const statusElement = $("#sync-status");
+
+    if (statusElement) {
+      statusElement.textContent =
+        `Instagram sync: ${sync.status}`;
+    }
+
+    if (
+      sync.status === "QUEUED" ||
+      sync.status === "RUNNING"
+    ) {
+      setTimeout(
+        pollSyncStatus,
+        2000,
+      );
+    } else {
+      loadLibrary();
+    }
+
+  } catch (error) {
+    console.error(
+      "Unable to check sync status:",
+      error,
+    );
+  }
+}
+      $("#search").oninput = () => {
+  libraryPage = 1;
+  loadLibrary();
+};
+
+$("#sort").onchange = () => {
+  libraryPage = 1;
+  loadLibrary();
+};
+
+$("#filter-status").onchange = () => {
+  libraryPage = 1;
+  loadLibrary();
+};
       loadDashboard();
     </script>
   </body>
