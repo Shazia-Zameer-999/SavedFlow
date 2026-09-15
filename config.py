@@ -66,6 +66,10 @@ class Config:
         "SAVEDFLOW_SYNC_TOKEN",
         "",
     )
+    GITHUB_ACTIONS_TOKEN = os.environ.get(
+        "GITHUB_ACTIONS_TOKEN",
+        "",
+    )
 
     # How often the local sync agent checks for a requested sync.
     SYNC_INTERVAL_SECONDS = int(
