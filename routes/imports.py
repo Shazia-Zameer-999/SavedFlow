@@ -9,7 +9,8 @@ Instagram Saved synchronization is split into two parts:
 
 Instagram authentication therefore never needs to reach the Flask server.
 """
-
+import json
+from urllib.request import Request, urlopen
 from datetime import datetime, timezone
 from bson import ObjectId
 from flask import Blueprint, jsonify, request, current_app
@@ -41,6 +42,41 @@ def _object_id(value):
             400,
         )
 
+def _trigger_github_sync():
+    token = current_app.config.get("GITHUB_ACTIONS_TOKEN")
+
+    if not token:
+        raise ApiError(
+            "GITHUB_ACTIONS_NOT_CONFIGURED",
+            "GITHUB_ACTIONS_TOKEN is not configured.",
+            503,
+        )
+
+    url = (
+        "https://api.github.com/repos/"
+        "Shazia-Zameer-999/SavedFlow/"
+        "actions/workflows/instagram-sync.yml/dispatches"
+    )
+
+    payload = json.dumps({
+        "ref": "main",
+    }).encode("utf-8")
+
+    req = Request(
+        url,
+        data=payload,
+        method="POST",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "SavedFlow",
+        },
+    )
+
+    with urlopen(req, timeout=15):
+        pass
 
 def _require_sync_token():
     expected = current_app.config["SAVEDFLOW_SYNC_TOKEN"]
@@ -169,6 +205,25 @@ def request_instagram_sync():
     }
 
     inserted = db.sync_jobs.insert_one(job)
+    try:
+        _trigger_github_sync()
+    except Exception as exc:
+        db.sync_jobs.update_one(
+            {"_id": inserted.inserted_id},
+            {
+                "$set": {
+                    "status": "FAILED",
+                    "completed_at": _utcnow(),
+                    "error": str(exc),
+                }
+            },
+        )
+
+        raise ApiError(
+            "GITHUB_SYNC_TRIGGER_FAILED",
+            "Could not start the Instagram sync workflow.",
+            502,
+        )
 
     return jsonify({
         "success": True,
