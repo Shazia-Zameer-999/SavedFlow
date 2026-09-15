@@ -31,6 +31,13 @@ jobs:
           echo "$INSTAGRAM_SESSION_STATE" | base64 --decode > instagram-state.json
         
 
+      - name: Create scheduled sync job
+        if: github.event_name == 'schedule'
+        env:
+          SAVEDFLOW_SERVER_URL: ${{ secrets.SAVEDFLOW_SERVER_URL }}
+        run: |
+          curl -f -X POST \
+            "$SAVEDFLOW_SERVER_URL/api/instagram/sync/request"
       - name: Run Instagram sync
         env:
           SAVEDFLOW_SERVER_URL: ${{ secrets.SAVEDFLOW_SERVER_URL }}
