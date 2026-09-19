@@ -15,6 +15,6 @@ jobs:
           SAVEDFLOW_SERVER_URL: ${{ secrets.SAVEDFLOW_SERVER_URL }}
           SAVEDFLOW_WORKER_TOKEN: ${{ secrets.SAVEDFLOW_WORKER_TOKEN }}
         run: |
-          curl -f -X POST \
+          curl -fL -X POST \
             -H "X-SavedFlow-Worker-Token: $SAVEDFLOW_WORKER_TOKEN" \
             "$SAVEDFLOW_SERVER_URL/api/ai/worker/run"
