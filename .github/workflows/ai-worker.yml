@@ -1,0 +1,20 @@
+name: AI Worker
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+
+jobs:
+  process-ai-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Process one queued AI job
+        env:
+          SAVEDFLOW_SERVER_URL: ${{ secrets.SAVEDFLOW_SERVER_URL }}
+          SAVEDFLOW_WORKER_TOKEN: ${{ secrets.SAVEDFLOW_WORKER_TOKEN }}
+        run: |
+          curl -f -X POST \
+            -H "X-SavedFlow-Worker-Token: $SAVEDFLOW_WORKER_TOKEN" \
+            "$SAVEDFLOW_SERVER_URL/api/ai/worker/run"

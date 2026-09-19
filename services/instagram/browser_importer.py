@@ -8,7 +8,7 @@ from pymongo.errors import DuplicateKeyError
 from models.item import new_item
 from services.instagram.base import BaseImporter, ImportResult
 from utils.urls import is_valid_instagram_url, normalize_instagram_url
-
+from services.jobs.manager import create_job
 
 class LocalBrowserImporter(BaseImporter):
     def __init__(self, db):
@@ -68,6 +68,13 @@ class LocalBrowserImporter(BaseImporter):
             except DuplicateKeyError:
                 result.duplicates += 1
                 continue
+
+            self.db.instagram_items.update_one(
+                {"_id": inserted.inserted_id},
+                {"$set": {"analysis_status": "QUEUED"}},
+            )
+            create_job(self.db, inserted.inserted_id)
+
             result.imported += 1
             result.metadata_only += 1
             result.imported_ids.append(inserted.inserted_id)
