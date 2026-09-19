@@ -8,7 +8,6 @@ can be polled via GET /api/jobs/<id> regardless of which thread ran them.
 For tests (and for synchronous/deterministic behavior generally), jobs can
 be run inline via run_analysis_job() directly instead of through a thread.
 """
-import threading
 
 from bson import ObjectId
 
@@ -95,10 +94,3 @@ def run_analysis_job(db, job_id, ai_client=None):
     )
 
     db.ai_jobs.update_one({"_id": job_id}, {"$set": {"status": "COMPLETED", "completed_at": utcnow()}})
-
-
-def start_analysis_job_async(db, job_id):
-    """Fire-and-forget background thread wrapper around run_analysis_job."""
-    thread = threading.Thread(target=run_analysis_job, args=(db, job_id), daemon=True)
-    thread.start()
-    return thread

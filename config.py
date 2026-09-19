@@ -70,6 +70,10 @@ class Config:
         "GITHUB_ACTIONS_TOKEN",
         "",
     )
+    SAVEDFLOW_WORKER_TOKEN = os.environ.get(
+        "SAVEDFLOW_WORKER_TOKEN",
+        "",
+    )
 
     # How often the local sync agent checks for a requested sync.
     SYNC_INTERVAL_SECONDS = int(
@@ -94,3 +98,4 @@ class TestConfig(Config):
     TESTING = True
     MONGO_DB_NAME = "savedflow_test"
     SAVEDFLOW_SYNC_TOKEN = "test-sync-token"
+    SAVEDFLOW_WORKER_TOKEN = "test-worker-token"

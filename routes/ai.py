@@ -11,7 +11,7 @@ from flask import Blueprint, current_app, jsonify, request
 from extensions import get_db
 from models.job import JOB_STATUSES
 from routes.items import _find_item_or_404, _object_id_or_404
-from services.jobs.manager import create_job, run_analysis_job, start_analysis_job_async
+from services.jobs.manager import create_job, run_analysis_job
 from utils.errors import ApiError
 from utils.json_utils import serialize_doc
 
@@ -22,10 +22,9 @@ def _start_job(db, item_id_oid, reanalyze=False):
     db.instagram_items.update_one({"_id": item_id_oid}, {"$set": {"analysis_status": "QUEUED"}})
     job_id = create_job(db, item_id_oid, job_type="REANALYZE" if reanalyze else "ANALYZE")
     if current_app.config.get("TESTING"):
-        # Deterministic, synchronous execution in tests.
+    # Deterministic, synchronous execution in tests.
         run_analysis_job(db, job_id)
-    else:
-        start_analysis_job_async(db, job_id)
+
     return job_id
 
 
@@ -75,3 +74,34 @@ def get_job(job_id):
     if not job:
         raise ApiError("JOB_NOT_FOUND", f"No job found with id '{job_id}'.", 404)
     return jsonify({"success": True, "job": serialize_doc(job)})
+@ai_bp.route("/api/ai/worker/run", methods=["POST"])
+def run_ai_worker():
+    expected_token = current_app.config.get("SAVEDFLOW_WORKER_TOKEN", "")
+    provided_token = request.headers.get("X-SavedFlow-Worker-Token", "")
+
+    if not expected_token or provided_token != expected_token:
+        raise ApiError(
+            "WORKER_UNAUTHORIZED",
+            "Invalid worker token.",
+            401,
+        )
+
+    db = get_db()
+    job = db.ai_jobs.find_one({"status": "QUEUED"}, sort=[("created_at", 1)])
+
+    if not job:
+        return jsonify({
+            "success": True,
+            "processed": False,
+            "message": "No queued AI jobs.",
+        })
+
+    run_analysis_job(db, job["_id"])
+
+    updated_job = db.ai_jobs.find_one({"_id": job["_id"]})
+
+    return jsonify({
+        "success": True,
+        "processed": True,
+        "job": serialize_doc(updated_job),
+    })
