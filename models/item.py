@@ -4,14 +4,37 @@ Instagram item schema (section 8.1) and status/enums (section 9).
 These are plain functions that build/validate dicts - not a heavyweight
 ORM - which keeps the project easy to follow for someone learning from it.
 """
+
 from utils.dates import utcnow
 
 MEDIA_STATUSES = {"AVAILABLE", "UNAVAILABLE", "UNKNOWN"}
-ANALYSIS_STATUSES = {"NOT_ANALYZED", "QUEUED", "PROCESSING", "COMPLETED", "FAILED", "NOT_AVAILABLE"}
-ITEM_STATUSES = {"UNWATCHED", "WATCHED", "WORTH_TRYING", "APPLIED", "NOT_USEFUL", "ARCHIVED"}
+ANALYSIS_STATUSES = {
+    "NOT_ANALYZED",
+    "QUEUED",
+    "WAITING_FOR_QUOTA",
+    "PROCESSING",
+    "COMPLETED",
+    "FAILED",
+    "NOT_AVAILABLE",
+}
+ITEM_STATUSES = {
+    "UNWATCHED",
+    "WATCHED",
+    "WORTH_TRYING",
+    "APPLIED",
+    "NOT_USEFUL",
+    "ARCHIVED",
+}
 PRIORITIES = {"LOW", "MEDIUM", "HIGH"}
 SOURCE_METHODS = {"API", "EXPORT", "MANUAL", "LOCAL_BROWSER"}
-RECOMMENDATIONS = {"WATCH_NOW", "WATCH_LATER", "WORTH_IMPLEMENTING", "LOW_VALUE", "SKIP", None}
+RECOMMENDATIONS = {
+    "WATCH_NOW",
+    "WATCH_LATER",
+    "WORTH_IMPLEMENTING",
+    "LOW_VALUE",
+    "SKIP",
+    None,
+}
 
 
 def new_item(
@@ -50,6 +73,8 @@ def new_item(
         "tags": [],
         "user_notes": "",
         "why_saved": "",
+        # Personal curation is deliberately independent of an AI score.
+        "is_useful": False,
         "ai_analysis_id": None,
         "analysis_status": "NOT_ANALYZED",
         "usefulness_score": None,
@@ -57,6 +82,7 @@ def new_item(
         "implementation_value_score": None,
         "learning_value_score": None,
         "recommendation": None,
+        "technical_topic": None,
         "created_at": now,
         "updated_at": now,
     }

@@ -23,7 +23,7 @@ from services.instagram.manual_importer import ManualURLImporter
 from services.instagram.browser_importer import LocalBrowserImporter
 from utils.errors import ApiError
 from utils.validation import require_json_body
-
+from services.media.thumbnail_store import store_thumbnail
 
 imports_bp = Blueprint("imports", __name__)
 
@@ -205,26 +205,6 @@ def request_instagram_sync():
     }
 
     inserted = db.sync_jobs.insert_one(job)
-    try:
-        _trigger_github_sync()
-    except Exception as exc:
-        db.sync_jobs.update_one(
-            {"_id": inserted.inserted_id},
-            {
-                "$set": {
-                    "status": "FAILED",
-                    "completed_at": _utcnow(),
-                    "error": str(exc),
-                }
-            },
-        )
-
-        raise ApiError(
-            "GITHUB_SYNC_TRIGGER_FAILED",
-            "Could not start the Instagram sync workflow.",
-            502,
-        )
-
     return jsonify({
         "success": True,
         "already_running": False,
@@ -334,7 +314,55 @@ def complete_instagram_sync(job_id):
         "status": status,
     })
 
+@imports_bp.route(
+    "/api/instagram/sync/thumbnail",
+    methods=["POST"],
+)
+def upload_instagram_thumbnail():
+    """Store an Instagram thumbnail downloaded by the local sync agent."""
 
+    _require_sync_token()
+
+    image = request.files.get("thumbnail")
+
+    if image is None:
+        raise ApiError(
+            "MISSING_THUMBNAIL",
+            "Thumbnail file is required.",
+            400,
+        )
+
+    source_url = request.form.get("source_url")
+
+    import os
+    import tempfile
+
+    temp_path = None
+
+    try:
+        with tempfile.NamedTemporaryFile(
+            suffix=".jpg",
+            delete=False,
+        ) as temp_file:
+            image.save(temp_file)
+            temp_path = temp_file.name
+
+        db = get_db()
+
+        file_id = store_thumbnail(
+            db=db,
+            image_path=temp_path,
+            source_url=source_url,
+        )
+
+        return jsonify({
+            "success": True,
+            "thumbnail_file_id": str(file_id),
+        })
+
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            os.unlink(temp_path)
 @imports_bp.route("/api/instagram/sync", methods=["POST"])
 def sync_instagram_saved():
     """

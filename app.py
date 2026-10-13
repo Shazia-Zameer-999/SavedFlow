@@ -13,6 +13,7 @@ from routes.recommendations import recommendations_bp
 from routes.dashboard import dashboard_bp
 from routes.preferences import preferences_bp
 from routes.reviews import reviews_bp
+from routes.media import media_bp
 
 
 def create_app(config_object=None):
@@ -31,6 +32,7 @@ def create_app(config_object=None):
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(preferences_bp)
     app.register_blueprint(reviews_bp)
+    app.register_blueprint(media_bp)
 
     @app.route("/")
     def index():
@@ -41,5 +43,5 @@ def create_app(config_object=None):
 
 app = create_app()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True, port=5002)

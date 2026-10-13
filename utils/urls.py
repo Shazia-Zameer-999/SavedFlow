@@ -1,26 +1,58 @@
 import re
 from urllib.parse import urlparse
 
-
 INSTAGRAM_HOST_RE = re.compile(
-    r"^(www\.)*?instagram\.com$",
+    r"^(?:www\.)?instagram\.com$",
     re.IGNORECASE,
 )
 
+
 PATH_RE = re.compile(
-    r"^/?"
-    r"(?:[A-Za-z0-9._]+/)?"
-    r"(reel|reels|p|tv)"
-    r"/([A-Za-z0-9_-]+)/?$"
+    r"^/?" r"(?:[A-Za-z0-9._-]+/)?" r"(reel|reels|p|tv)" r"/([A-Za-z0-9_-]+)/?$"
 )
 
 
+MARKDOWN_URL_RE = re.compile(
+    r"^(?:!\[[^\]]*\]|\[[^\]]*\])\s*\((https?://[^)\s]+)\)\s*$",
+    re.IGNORECASE,
+)
+RAW_URL_RE = re.compile(r"https?://[^\s)\]>\"'`]+", re.IGNORECASE)
+
+
+def _clean_url(url):
+    """
+    Accept either a normal URL or a Markdown-style URL:
+
+    https://instagram.com/reel/ABC123/
+
+    [https://instagram.com/reel/ABC123/](https://instagram.com/reel/ABC123/)
+    """
+    if not isinstance(url, str):
+        return None
+
+    url = url.strip()
+
+    markdown_match = MARKDOWN_URL_RE.match(url)
+
+    if markdown_match:
+        url = markdown_match.group(1).strip()
+
+    if not url.startswith(("http://", "https://")):
+        raw_match = RAW_URL_RE.search(url)
+        if raw_match:
+            url = raw_match.group(0).strip()
+
+    return url
+
+
 def is_valid_instagram_url(url):
-    if not isinstance(url, str) or not url.strip():
+    url = _clean_url(url)
+
+    if not url:
         return False
 
     try:
-        parsed = urlparse(url.strip())
+        parsed = urlparse(url)
     except Exception:
         return False
 
@@ -40,8 +72,13 @@ def is_valid_instagram_url(url):
 
 
 def extract_shortcode(url):
+    url = _clean_url(url)
+
+    if not url:
+        return None
+
     try:
-        parsed = urlparse(url.strip())
+        parsed = urlparse(url)
     except Exception:
         return None
 
@@ -54,10 +91,12 @@ def extract_shortcode(url):
 
 
 def normalize_instagram_url(url):
+    url = _clean_url(url)
+
     if not is_valid_instagram_url(url):
         return None
 
-    parsed = urlparse(url.strip())
+    parsed = urlparse(url)
 
     match = PATH_RE.match(parsed.path)
 

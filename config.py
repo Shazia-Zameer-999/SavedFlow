@@ -36,7 +36,11 @@ class Config:
     GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
     GEMINI_MODEL = os.environ.get(
         "GEMINI_MODEL",
-        "gemini-3.5-flash-lite",
+        "gemini-2.5-flash",
+    )
+    GEMINI_DAILY_REQUEST_LIMIT = int(os.environ.get("GEMINI_DAILY_REQUEST_LIMIT", "20"))
+    GEMINI_MIN_RETRY_DELAY_SECONDS = int(
+        os.environ.get("GEMINI_MIN_RETRY_DELAY_SECONDS", "300")
     )
 
     # Local Instagram sync configuration.
@@ -74,20 +78,25 @@ class Config:
         "SAVEDFLOW_WORKER_TOKEN",
         "",
     )
+    # Local-only profile used by the persistent worker for requested evidence
+    # capture. The profile path and its cookies are never sent to Flask clients.
+    INSTAGRAM_BROWSER_PROFILE = os.environ.get(
+        "INSTAGRAM_BROWSER_PROFILE",
+        "",
+    )
+    AI_JOB_MAX_RETRIES = int(os.environ.get("AI_JOB_MAX_RETRIES", "3"))
+    AI_JOB_STALE_TIMEOUT_SECONDS = int(
+        os.environ.get("AI_JOB_STALE_TIMEOUT_SECONDS", "1800")
+    )
 
     # How often the local sync agent checks for a requested sync.
-    SYNC_INTERVAL_SECONDS = int(
-        os.environ.get("SYNC_INTERVAL_SECONDS", "60")
-    )
+    SYNC_INTERVAL_SECONDS = int(os.environ.get("SYNC_INTERVAL_SECONDS", "60"))
 
     TESTING = False
 
     @classmethod
     def instagram_configured(cls):
-        return bool(
-            cls.META_ACCESS_TOKEN
-            and cls.INSTAGRAM_ACCOUNT_ID
-        )
+        return bool(cls.META_ACCESS_TOKEN and cls.INSTAGRAM_ACCOUNT_ID)
 
     @classmethod
     def ai_configured(cls):

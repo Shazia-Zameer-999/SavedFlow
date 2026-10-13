@@ -45,20 +45,13 @@ MAX_IDLE_ROUNDS = 5
 
 
 def get_config(args):
-    server = (
-        args.server
-        or os.environ.get("SAVEDFLOW_SERVER_URL", "")
-    ).rstrip("/")
+    server = (args.server or os.environ.get("SAVEDFLOW_SERVER_URL", "")).rstrip("/")
 
-    saved_url = (
-        args.saved_url
-        or os.environ.get("INSTAGRAM_SAVED_URL", "")
-    ).rstrip("/")
-
-    token = (
-        args.token
-        or os.environ.get("SAVEDFLOW_SYNC_TOKEN", "")
+    saved_url = (args.saved_url or os.environ.get("INSTAGRAM_SAVED_URL", "")).rstrip(
+        "/"
     )
+
+    token = args.token or os.environ.get("SAVEDFLOW_SYNC_TOKEN", "")
 
     try:
         interval = int(
@@ -88,8 +81,7 @@ def require_config(server, saved_url, token):
 
     if missing:
         print(
-            "Missing configuration: "
-            + ", ".join(missing),
+            "Missing configuration: " + ", ".join(missing),
             file=sys.stderr,
         )
         return False
@@ -111,9 +103,7 @@ def post_json(url, payload, token):
     )
 
     with urlopen(request, timeout=120) as response:
-        return json.loads(
-            response.read().decode("utf-8")
-        )
+        return json.loads(response.read().decode("utf-8"))
 
 
 def get_json(url, token):
@@ -126,9 +116,104 @@ def get_json(url, token):
     )
 
     with urlopen(request, timeout=30) as response:
-        return json.loads(
-            response.read().decode("utf-8")
-        )
+        return json.loads(response.read().decode("utf-8"))
+
+
+def upload_thumbnail(
+    server,
+    token,
+    image_bytes,
+    source_url,
+):
+    boundary = "----SavedFlowThumbnailBoundary"
+
+    body = b"".join(
+        [
+            (
+                f"--{boundary}\r\n"
+                'Content-Disposition: form-data; name="thumbnail"; '
+                'filename="instagram-thumbnail.jpg"\r\n'
+                "Content-Type: image/jpeg\r\n\r\n"
+            ).encode("utf-8"),
+            image_bytes,
+            (
+                f"\r\n--{boundary}\r\n"
+                'Content-Disposition: form-data; name="source_url"\r\n\r\n'
+                f"{source_url or ''}\r\n"
+                f"--{boundary}--\r\n"
+            ).encode("utf-8"),
+        ]
+    )
+
+    request = Request(
+        urljoin(
+            server + "/",
+            "api/instagram/sync/thumbnail",
+        ),
+        data=body,
+        headers={
+            "Content-Type": (f"multipart/form-data; boundary={boundary}"),
+            "X-SavedFlow-Sync-Token": token,
+        },
+        method="POST",
+    )
+
+    with urlopen(request, timeout=60) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def attach_thumbnail_file_ids(
+    context,
+    server,
+    token,
+    items,
+):
+    """
+    Download fresh Instagram thumbnails through the authenticated
+    Playwright context and upload them to SavedFlow.
+    """
+
+    for index, item in enumerate(items):
+        thumbnail_url = item.get("thumbnail_url")
+
+        if not thumbnail_url:
+            continue
+
+        try:
+            print(f"Downloading thumbnail " f"{index + 1}/{len(items)}...")
+
+            response = context.request.get(
+                thumbnail_url,
+                timeout=30000,
+            )
+
+            if not response.ok:
+                print(f"Thumbnail request failed: " f"{response.status}")
+                continue
+
+            image_bytes = response.body()
+
+            if not image_bytes:
+                print("Thumbnail response was empty.")
+                continue
+
+            upload_response = upload_thumbnail(
+                server=server,
+                token=token,
+                image_bytes=image_bytes,
+                source_url=thumbnail_url,
+            )
+
+            file_id = upload_response.get("thumbnail_file_id")
+
+            if file_id:
+                item["thumbnail_file_id"] = file_id
+                print(f"Thumbnail stored: {file_id}")
+
+        except Exception as exc:
+            print(f"Could not store thumbnail: {exc}")
+
+    return items
 
 
 def discover_items(page):
@@ -147,8 +232,7 @@ def discover_items(page):
 
         page.wait_for_timeout(SCROLL_WAIT_MS)
 
-        cards = page.locator("a[href]").evaluate_all(
-            """els => els.map(e => {
+        cards = page.locator("a[href]").evaluate_all("""els => els.map(e => {
                 const image = e.querySelector('img');
 
                 return {
@@ -162,8 +246,7 @@ def discover_items(page):
                         image?.alt ||
                         null
                 };
-            })"""
-        )
+            })""")
 
         for card in cards:
             href = card.get("href")
@@ -177,8 +260,7 @@ def discover_items(page):
             )
 
             discovered_url = (
-                discovered_url
-                .replace(
+                discovered_url.replace(
                     "/saved/reel/",
                     "/reel/",
                 )
@@ -196,17 +278,14 @@ def discover_items(page):
                 )
             )
 
-            path = (
-                discovered_url
-                .split("?", 1)[0]
-                .rstrip("/")
-            )
+            path = discovered_url.split("?", 1)[0].rstrip("/")
 
             parts = path.split("/")
 
             if (
                 len(parts) >= 3
-                and parts[-2] in {
+                and parts[-2]
+                in {
                     "reel",
                     "reels",
                     "p",
@@ -216,12 +295,8 @@ def discover_items(page):
             ):
                 discovered[discovered_url] = {
                     "url": discovered_url,
-                    "thumbnail_url": card.get(
-                        "thumbnail_url"
-                    ),
-                    "visible_label": card.get(
-                        "visible_label"
-                    ),
+                    "thumbnail_url": card.get("thumbnail_url"),
+                    "visible_label": card.get("visible_label"),
                 }
 
         after_count = len(discovered)
@@ -263,6 +338,7 @@ def run_sync(
     token,
     profile_path,
     diagnose=False,
+    thumbnail_limit=0,
 ):
     try:
         from playwright.sync_api import sync_playwright
@@ -288,20 +364,12 @@ def run_sync(
                 )
             else:
                 context = pw.chromium.launch_persistent_context(
-                    str(
-                        Path(profile_path)
-                        .expanduser()
-                        .resolve()
-                    ),
+                    str(Path(profile_path).expanduser().resolve()),
                     headless=False,
                     accept_downloads=False,
                 )
 
-            page = (
-                context.pages[0]
-                if context.pages
-                else context.new_page()
-            )
+            page = context.pages[0] if context.pages else context.new_page()
 
             print("Opening Instagram...")
             page.goto(
@@ -353,6 +421,23 @@ def run_sync(
                     )
                 )
                 return 0
+            if items:
+                thumbnail_items = items
+
+                if thumbnail_limit > 0:
+                    thumbnail_items = items[:thumbnail_limit]
+
+                print(
+                    "Downloading and storing thumbnails "
+                    f"for {len(thumbnail_items)} item(s)..."
+                )
+
+                attach_thumbnail_file_ids(
+                    context=context,
+                    server=server,
+                    token=token,
+                    items=thumbnail_items,
+                )
             print("Sending discovered items to SavedFlow...")
             sync_response = post_json(
                 urljoin(
@@ -400,6 +485,7 @@ def process_pending_job(
     server,
     token,
     profile,
+    thumbnail_limit=0,
 ):
     try:
         job = get_json(
@@ -419,9 +505,7 @@ def process_pending_job(
     job_id = job["job_id"]
     collection_url = job.get("collection_url")
 
-    print(
-        f"Starting sync job {job_id}..."
-    )
+    print(f"Starting sync job {job_id}...")
 
     try:
         result = run_sync(
@@ -430,17 +514,13 @@ def process_pending_job(
             token=token,
             profile_path=profile,
             diagnose=False,
+            thumbnail_limit=thumbnail_limit,
         )
 
-        status = (
-            "COMPLETED"
-            if result == 0
-            else "FAILED"
-        )
+        status = "COMPLETED" if result == 0 else "FAILED"
 
         post_json(
-            server
-            + f"/api/instagram/sync/{job_id}/complete",
+            server + f"/api/instagram/sync/{job_id}/complete",
             {
                 "status": status,
                 "result": {
@@ -453,8 +533,7 @@ def process_pending_job(
     except Exception as exc:
         try:
             post_json(
-                server
-                + f"/api/instagram/sync/{job_id}/complete",
+                server + f"/api/instagram/sync/{job_id}/complete",
                 {
                     "status": "FAILED",
                     "error": str(exc),
@@ -509,6 +588,12 @@ def main():
         action="store_true",
         help="Run discovery once and print discovered items.",
     )
+    parser.add_argument(
+        "--thumbnail-limit",
+        type=int,
+        default=0,
+        help="Limit how many thumbnails are stored. 0 means all.",
+    )
 
     args = parser.parse_args()
 
@@ -530,24 +615,17 @@ def main():
             diagnose=True,
         )
 
-    print(
-        "SavedFlow local sync agent started."
-    )
-    print(
-        f"Server: {server}"
-    )
-    print(
-        f"Collection: {saved_url}"
-    )
-    print(
-        f"Polling every {interval} seconds."
-    )
+    print("SavedFlow local sync agent started.")
+    print(f"Server: {server}")
+    print(f"Collection: {saved_url}")
+    print(f"Polling every {interval} seconds.")
 
     while True:
         process_pending_job(
             server,
             token,
             args.profile,
+            thumbnail_limit=args.thumbnail_limit,
         )
 
         if args.once:

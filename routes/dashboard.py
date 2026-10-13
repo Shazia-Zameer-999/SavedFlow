@@ -1,4 +1,5 @@
 """GET /api/dashboard (section 29) - entirely derived from MongoDB data."""
+
 from flask import Blueprint, jsonify
 
 from extensions import get_db
@@ -18,22 +19,45 @@ def dashboard():
         "unwatched": items.count_documents({"watch_count": 0}),
         "watched": items.count_documents({"watch_count": {"$gt": 0}}),
         "ai_analyzed": items.count_documents({"analysis_status": "COMPLETED"}),
-        "analysis_pending": items.count_documents({"analysis_status": {"$in": ["QUEUED", "PROCESSING"]}}),
-        "worth_watching": items.count_documents({"recommendation": {"$in": ["WATCH_NOW", "WATCH_LATER"]}}),
-        "worth_implementing": items.count_documents({"recommendation": "WORTH_IMPLEMENTING"}),
+        "not_analyzed": items.count_documents({"analysis_status": "NOT_ANALYZED"}),
+        "analysis_queued": items.count_documents({"analysis_status": "QUEUED"}),
+        "analysis_waiting_quota": items.count_documents(
+            {"analysis_status": "WAITING_FOR_QUOTA"}
+        ),
+        "analysis_processing": items.count_documents({"analysis_status": "PROCESSING"}),
+        "analysis_failed": items.count_documents({"analysis_status": "FAILED"}),
+        "analysis_pending": items.count_documents(
+            {"analysis_status": {"$in": ["QUEUED", "WAITING_FOR_QUOTA", "PROCESSING"]}}
+        ),
+        "useful_items": items.count_documents({"is_useful": True}),
+        "worth_watching": items.count_documents(
+            {"recommendation": {"$in": ["WATCH_NOW", "WATCH_LATER"]}}
+        ),
+        "worth_implementing": items.count_documents(
+            {"recommendation": "WORTH_IMPLEMENTING"}
+        ),
         "applied": items.count_documents({"status": "APPLIED"}),
         "not_useful": items.count_documents({"status": "NOT_USEFUL"}),
         "archived": items.count_documents({"status": "ARCHIVED"}),
-        "pending_actions": db.actions.count_documents({"status": {"$in": ["NOT_STARTED", "PLANNED", "IN_PROGRESS"]}}),
+        "pending_actions": db.actions.count_documents(
+            {"status": {"$in": ["NOT_STARTED", "PLANNED", "IN_PROGRESS"]}}
+        ),
     }
 
     top_recs = recommend_general(db, limit=5)
     data["top_recommendations"] = [
-        {"item_id": str(r["item"]["_id"]), "score": r["score"], "reason": r["reason"]} for r in top_recs
+        {"item_id": str(r["item"]["_id"]), "score": r["score"], "reason": r["reason"]}
+        for r in top_recs
     ]
-    data["recently_imported"] = serialize_doc(list(items.find().sort("imported_at", -1).limit(5)))
+    data["recently_imported"] = serialize_doc(
+        list(items.find().sort("imported_at", -1).limit(5))
+    )
     data["recently_watched"] = serialize_doc(
-        list(items.find({"last_watched_at": {"$ne": None}}).sort("last_watched_at", -1).limit(5))
+        list(
+            items.find({"last_watched_at": {"$ne": None}})
+            .sort("last_watched_at", -1)
+            .limit(5)
+        )
     )
     data["recently_applied"] = serialize_doc(
         list(items.find({"applied_at": {"$ne": None}}).sort("applied_at", -1).limit(5))

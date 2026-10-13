@@ -15,6 +15,20 @@ class AIClientError(Exception):
     pass
 
 
+class GeminiQuotaError(AIClientError):
+    """A provider response indicates rate or quota exhaustion."""
+
+
+def _wrap_gemini_error(prefix, exc):
+    message = str(exc)
+    if any(
+        marker in message.upper()
+        for marker in ("429", "RESOURCE_EXHAUSTED", "RATE LIMIT", "QUOTA")
+    ):
+        return GeminiQuotaError(f"{prefix}: {message}")
+    return AIClientError(f"{prefix}: {message}")
+
+
 class AIClient:
     def __init__(self, api_key=None, model=None):
         self.api_key = Config.GEMINI_API_KEY if api_key is None else api_key
@@ -66,7 +80,66 @@ Do not wrap the JSON in markdown code fences.
                 },
             )
         except Exception as exc:
-            raise AIClientError(f"Gemini API error: {exc}") from exc
+            raise _wrap_gemini_error("Gemini API error", exc) from exc
+
+        text = getattr(response, "text", None)
+
+        if not text:
+            raise AIClientError("Gemini returned an empty response.")
+
+        return text
+
+    def complete_json_with_video(
+        self,
+        system_prompt,
+        user_prompt,
+        video_path,
+        frame_paths=None,
+        temperature=0.2,
+    ):
+        """
+        Send a local video to Gemini together with the analysis prompt
+        and return the raw JSON response.
+        """
+
+        if not self.is_configured():
+            raise AIClientError("GEMINI_API_KEY is not configured.")
+
+        video_path = str(video_path)
+
+        client = self._get_client()
+
+        try:
+            uploaded_file = client.files.upload(file=video_path)
+
+            frame_files = [
+                client.files.upload(file=str(frame_path))
+                for frame_path in (frame_paths or [])
+            ]
+            response = client.models.generate_content(
+                model=self.model,
+                contents=[
+                    uploaded_file,
+                    *frame_files,
+                    f"""
+SYSTEM INSTRUCTIONS:
+{system_prompt}
+
+USER REQUEST:
+{user_prompt}
+
+IMPORTANT:
+Return ONLY valid JSON.
+Do not wrap the JSON in markdown code fences.
+""",
+                ],
+                config={
+                    "temperature": temperature,
+                    "response_mime_type": "application/json",
+                },
+            )
+        except Exception as exc:
+            raise _wrap_gemini_error("Gemini video analysis error", exc) from exc
 
         text = getattr(response, "text", None)
 
@@ -95,6 +168,4 @@ Do not wrap the JSON in markdown code fences.
         try:
             return json.loads(cleaned)
         except (json.JSONDecodeError, TypeError) as exc:
-            raise AIClientError(
-                f"AI response was not valid JSON: {exc}"
-            )
+            raise AIClientError(f"AI response was not valid JSON: {exc}")

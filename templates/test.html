@@ -6,7 +6,8 @@
     <title>SavedFlow</title>
     <style>
       :root {
-        --font-family-primary: SF-Pro-Text, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --font-family-primary:
+          SF-Pro-Text, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         --font-size-xs: 0.1px;
         --font-size-sm: 12px;
         --font-size-md: 13px;
@@ -84,8 +85,8 @@
         overscroll-behavior-x: none;
         background: var(--color-surface-base);
         color: var(--color-text-primary);
-        font: var(--font-weight-base) var(--font-size-md) / var(--line-height-base)
-          var(--font-family-primary);
+        font: var(--font-weight-base) var(--font-size-md) /
+          var(--line-height-base) var(--font-family-primary);
       }
 
       .app {
@@ -530,7 +531,7 @@
         align-items: center;
         gap: 12px;
       }
-      
+
       .drawer-head .btn {
         flex-shrink: 0;
       }
@@ -572,42 +573,42 @@
    LIBRARY PAGINATION
    ========================================= */
 
-.library-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 24px;
-  padding: 8px 0;
-  flex-wrap: wrap;
-}
+      .library-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 24px;
+        padding: 8px 0;
+        flex-wrap: wrap;
+      }
 
-.library-pagination .page-info {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-  text-align: center;
-}
+      .library-pagination .page-info {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        text-align: center;
+      }
 
-.library-pagination button {
-  border: 1px solid var(--line);
-  background: #fff;
-  color: var(--ink);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-weight: 700;
-  cursor: pointer;
-  min-width: 84px;
-}
+      .library-pagination button {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--ink);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-weight: 700;
+        cursor: pointer;
+        min-width: 84px;
+      }
 
-.library-pagination button:hover:not(:disabled) {
-  border-color: var(--accent);
-}
+      .library-pagination button:hover:not(:disabled) {
+        border-color: var(--accent);
+      }
 
-.library-pagination button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
+      .library-pagination button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
 
       /* =========================================
    POLISHED APP UI
@@ -651,7 +652,10 @@
       .nav button {
         min-height: 44px;
         font-weight: 650;
-        transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+        transition:
+          background 150ms ease,
+          color 150ms ease,
+          transform 150ms ease;
       }
 
       .nav button:hover {
@@ -684,7 +688,10 @@
 
       .card {
         box-shadow: var(--shadow-sm);
-        transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease;
+        transition:
+          box-shadow 160ms ease,
+          transform 160ms ease,
+          border-color 160ms ease;
       }
 
       .item:hover {
@@ -715,7 +722,9 @@
       .form select {
         min-height: 42px;
         outline: none;
-        transition: border-color 150ms ease, box-shadow 150ms ease;
+        transition:
+          border-color 150ms ease,
+          box-shadow 150ms ease;
       }
 
       .toolbar input:focus,
@@ -724,14 +733,17 @@
       .form textarea:focus,
       .form select:focus {
         border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(103, 88, 232, 0.10);
+        box-shadow: 0 0 0 3px rgba(103, 88, 232, 0.1);
       }
 
       .item-actions button,
       .library-pagination button,
       .btn {
         min-height: 42px;
-        transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+        transition:
+          transform 120ms ease,
+          box-shadow 120ms ease,
+          border-color 120ms ease;
       }
 
       .btn:hover:not(:disabled),
@@ -831,7 +843,9 @@
           background: rgba(17, 24, 39, 0.45);
           opacity: 0;
           visibility: hidden;
-          transition: opacity 220ms ease, visibility 220ms ease;
+          transition:
+            opacity 220ms ease,
+            visibility 220ms ease;
           z-index: 19;
         }
 
@@ -1141,7 +1155,7 @@
           transition: none;
         }
       }
-    
+
       /* =========================================
          DESIGN SYSTEM APPLICATION
          ========================================= */
@@ -1311,7 +1325,7 @@
       .form select {
         background: var(--color-surface-base);
         color: var(--color-text-primary);
-        border-color: rgba(229, 231, 235, 0.20);
+        border-color: rgba(229, 231, 235, 0.2);
         border-radius: var(--radius-sm);
         min-height: 44px;
       }
@@ -1379,7 +1393,7 @@
       .empty {
         background: var(--color-surface-strong);
         color: var(--color-text-secondary);
-        border-color: rgba(229, 231, 235, 0.20);
+        border-color: rgba(229, 231, 235, 0.2);
       }
 
       .drawer {
@@ -1400,7 +1414,7 @@
       .library-pagination button {
         background: var(--color-surface-muted);
         color: var(--color-text-primary);
-        border-color: rgba(229, 231, 235, 0.20);
+        border-color: rgba(229, 231, 235, 0.2);
         min-height: 44px;
       }
 
@@ -1424,7 +1438,7 @@
       .sidebar-close {
         background: var(--color-surface-muted);
         color: var(--color-text-primary);
-        border-color: rgba(229, 231, 235, 0.20);
+        border-color: rgba(229, 231, 235, 0.2);
       }
 
       .mobile-menu-btn:hover,
@@ -1518,7 +1532,6 @@
         }
       }
 
-    
       /* =========================================
          SAVEDFLOW V2 — VISUAL REFINEMENT
          ========================================= */
@@ -1810,7 +1823,7 @@
       :where(button, input, select, textarea, a):focus-visible {
         outline: 2px solid var(--color-text-inverse);
         outline-offset: 3px;
-        box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.10);
+        box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.1);
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -1825,8 +1838,7 @@
           transform: none;
         }
       }
-
-</style>
+    </style>
   </head>
   <body>
     <div class="app">
@@ -1838,11 +1850,14 @@
             type="button"
             aria-label="Close navigation"
             onclick="closeNav()"
-          >×</button>
+          >
+            ×
+          </button>
         </div>
         <nav class="nav">
           <button class="active" data-view="dashboard">◈ &nbsp;Dashboard</button
           ><button data-view="library">▦ &nbsp;Library</button
+          ><button data-view="useful">♥ &nbsp;Useful</button
           ><button data-view="recommendations">✦ &nbsp;Recommendations</button
           ><button data-view="implementation">✓ &nbsp;Implementation</button
           ><button data-view="review">◷ &nbsp;Weekly Review</button
@@ -1866,13 +1881,22 @@
               aria-controls="sidebar"
               aria-expanded="false"
               onclick="toggleNav()"
-            >☰</button>
+            >
+              ☰
+            </button>
             <div>
               <div class="eyebrow">Personal knowledge base</div>
               <div class="title" id="page-title">Your saves, in flow.</div>
             </div>
           </div>
-          <button class="btn" type="button" aria-label="Sync Instagram Saved collection" onclick="showSync()">Sync Instagram Saved</button>
+          <button
+            class="btn"
+            type="button"
+            aria-label="Sync Instagram Saved collection"
+            onclick="showSync()"
+          >
+            Sync Instagram Saved
+          </button>
         </header>
         <section id="dashboard" class="view">
           <div class="metrics" id="metrics"></div>
@@ -1894,9 +1918,10 @@
           <div class="toolbar">
             <input
               id="search"
-              placeholder="Search captions, creators, notes"
+              placeholder="Search captions, creators, notes, topics, tags"
             /><select id="sort">
               <option value="created_at">Newest</option>
+              <option value="oldest">Oldest</option>
               <option value="usefulness">Usefulness</option>
               <option value="development_relevance">
                 Development relevance
@@ -1908,11 +1933,38 @@
               <option>APPLIED</option>
               <option>NOT_USEFUL</option>
               <option>ARCHIVED</option></select
+            ><select id="filter-analysis">
+              <option value="">All analysis states</option>
+              <option value="NOT_ANALYZED">Not analyzed</option>
+              <option value="QUEUED">Queued</option>
+              <option value="WAITING_FOR_QUOTA">Waiting for quota</option>
+              <option value="PROCESSING">Processing</option>
+              <option value="COMPLETED">Analyzed</option>
+              <option value="FAILED">Failed</option></select
             ><button class="btn alt" onclick="loadLibrary()">Refresh</button>
           </div>
           <div class="muted" id="library-count"></div>
           <div class="cards" id="library-cards"></div>
           <div class="library-pagination" id="library-pagination"></div>
+        </section>
+        <section id="useful" class="view hidden">
+          <div class="section-head">
+            <div>
+              <h2>Your useful Reels</h2>
+              <p class="muted">Personal curation, independent of AI scores.</p>
+            </div>
+            <button class="btn alt" onclick="loadUseful()">Refresh</button>
+          </div>
+          <div class="toolbar">
+            <input id="useful-search" placeholder="Search useful Reels" />
+            <select id="useful-sort">
+              <option value="date_added">Recently added</option>
+              <option value="usefulness">AI usefulness score</option>
+            </select>
+          </div>
+          <div class="muted" id="useful-count"></div>
+          <div class="cards" id="useful-cards"></div>
+          <div class="library-pagination" id="useful-pagination"></div>
         </section>
         <section id="recommendations" class="view hidden">
           <div class="section-head">
@@ -1946,43 +1998,42 @@
           </div>
         </section>
         <section id="settings" class="view hidden">
-  <div class="health" id="health-cards"></div>
+          <div class="health" id="health-cards"></div>
 
-  <div class="card section">
-    <div class="section-head">
-      <div>
-        <h2>Instagram Saved sync</h2>
-        <p class="muted">
-          Sync your Saved collection through the local browser agent.
-          Your Instagram password, cookies, and browser session stay
-          on this computer.
-        </p>
-      </div>
+          <div class="card section">
+            <div class="section-head">
+              <div>
+                <h2>Instagram Saved sync</h2>
+                <p class="muted">
+                  Sync your Saved collection through the local browser agent.
+                  Your Instagram password, cookies, and browser session stay on
+                  this computer.
+                </p>
+              </div>
 
-      <button class="btn" onclick="requestInstagramSync()">
-        Sync Instagram Saved
-      </button>
-    </div>
+              <button class="btn" onclick="requestInstagramSync()">
+                Sync Instagram Saved
+              </button>
+            </div>
 
-    <div id="sync-status" class="muted">
-      Checking sync status...
-    </div>
+            <div id="sync-status" class="muted">Checking sync status...</div>
 
-    <div class="section" style="margin-top: 16px;">
-      <strong>Local sync agent</strong>
+            <div class="section" style="margin-top: 16px">
+              <strong>Local sync agent</strong>
 
-      <p class="muted">
-        Keep the local sync agent running while you use the
-        Sync button above.
-      </p>
+              <p class="muted">
+                Keep the local sync agent running while you use the Sync button
+                above.
+              </p>
 
-      <code>
-        python scripts/instagram_saved_sync.py --profile ./local-instagram-profile
-      </code>
-    </div>
-  </div>
-</section>
-        <p class="muted" id="toast"></p>
+              <code>
+                python scripts/instagram_saved_sync.py --profile
+                ./local-instagram-profile
+              </code>
+            </div>
+          </div>
+        </section>
+        <p class="muted" id="toast" role="status" aria-live="polite"></p>
       </main>
     </div>
     <aside id="drawer" class="drawer card hidden">
@@ -1995,25 +2046,40 @@
     <script>
       const $ = (s) => document.querySelector(s);
 
-let libraryPage = 1;
-const LIBRARY_PAGE_SIZE = 50;
+      let libraryPage = 1;
+      let usefulPage = 1;
+      const LIBRARY_PAGE_SIZE = 50;
+      const UI_STATE_KEY = "savedflow-ui-state";
 
-const esc = (x) =>
-  String(x ?? "").replace(
-    /[&<>"']/g,
-    (c) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[c],
-  );
+      const esc = (x) =>
+        String(x ?? "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
       async function api(url, opt) {
         try {
           const r = await fetch(url, opt);
-          const data = await r.json();
+          let data;
+          try {
+            data = await r.json();
+          } catch (_) {
+            return {
+              success: false,
+              error: {
+                code: "INVALID_API_RESPONSE",
+                message: r.ok
+                  ? "SavedFlow returned an invalid response."
+                  : `SavedFlow server error (${r.status}).`,
+              },
+            };
+          }
           if (!r.ok) {
             return {
               success: false,
@@ -2033,11 +2099,36 @@ const esc = (x) =>
         dashboard: "Your saves, in flow.",
         library: "Your content library",
         recommendations: "What deserves your attention",
+        useful: "Your useful Reels",
         implementation: "Ideas to put into practice",
         review: "Your weekly review",
         settings: "Settings & connections",
       };
-      function go(view) {
+      function saveUiState(view) {
+        try {
+          sessionStorage.setItem(
+            UI_STATE_KEY,
+            JSON.stringify({
+              view:
+                view ||
+                document.querySelector("[data-view].active")?.dataset.view ||
+                "dashboard",
+              libraryPage,
+              usefulPage,
+              search: $("#search")?.value || "",
+              sort: $("#sort")?.value || "created_at",
+              status: $("#filter-status")?.value || "",
+              analysis: $("#filter-analysis")?.value || "",
+              usefulSearch: $("#useful-search")?.value || "",
+              usefulSort: $("#useful-sort")?.value || "date_added",
+              scrollY: window.scrollY,
+            }),
+          );
+        } catch (_) {}
+      }
+
+      function go(view, updateHistory = true) {
+        if (!views[view]) view = "dashboard";
         document
           .querySelectorAll(".view")
           .forEach((x) => x.classList.toggle("hidden", x.id !== view));
@@ -2047,8 +2138,13 @@ const esc = (x) =>
             x.classList.toggle("active", x.dataset.view === view),
           );
         $("#page-title").textContent = views[view];
+        saveUiState(view);
+        if (updateHistory && window.location.hash !== `#${view}`) {
+          history.replaceState({ view }, "", `#${view}`);
+        }
         if (view === "dashboard") loadDashboard();
         if (view === "library") loadLibrary();
+        if (view === "useful") loadUseful();
         if (view === "recommendations") loadRecommendations();
         if (view === "implementation") {
           loadImplementation();
@@ -2056,15 +2152,13 @@ const esc = (x) =>
         }
         if (view === "settings") loadHealth();
       }
-      document
-        .querySelectorAll("[data-view]")
-        .forEach(
-          (x) =>
-            (x.onclick = () => {
-              go(x.dataset.view);
-              closeNav();
-            }),
-        );
+      document.querySelectorAll("[data-view]").forEach(
+        (x) =>
+          (x.onclick = () => {
+            go(x.dataset.view);
+            closeNav();
+          }),
+      );
 
       function toggleNav() {
         const open = document.body.classList.toggle("nav-open");
@@ -2097,24 +2191,60 @@ const esc = (x) =>
               : "warn";
         return `<span class="chip ${cls}">${esc(i.recommendation || "UNRANKED")}</span>`;
       }
+      function analysisLabel(status) {
+        return (
+          {
+            NOT_ANALYZED: "Not analyzed",
+            QUEUED: "Queued",
+            WAITING_FOR_QUOTA: "Waiting for Gemini quota",
+            PROCESSING: "Analysis in progress",
+            COMPLETED: "AI analyzed",
+            FAILED: "Analysis failed",
+            NOT_AVAILABLE: "Analysis unavailable",
+          }[status] || "Analysis pending"
+        );
+      }
       function itemCard(i) {
-        let meta = i.source_metadata || {},
-          thumb = meta.thumbnail_url
-            ? `<img src="${esc(meta.thumbnail_url)}" alt="${esc(meta.visible_label || "Instagram preview")}" style="width:100%;height:145px;object-fit:cover;border-radius:9px;background:#edf0f4" onerror="this.remove()">`
-            : "";
-        return `<article class="card item">${thumb}<div class="item-title">${esc(i.caption || meta.visible_label || i.creator_username || "Saved Instagram item")}</div><div class="muted">${esc(i.source_method || "MANUAL")} · ${esc(i.media_status || "UNKNOWN")}</div><div class="chips">${badge(i)}<span class="chip">Usefulness ${i.usefulness_score ?? "—"}</span><span class="chip">Dev ${i.development_relevance_score ?? "—"}</span></div><div class="muted">${i.analysis_status === "COMPLETED" ? "AI analyzed" : "Analysis " + String(i.analysis_status || "pending").toLowerCase()} · ${esc(i.status || "UNWATCHED")}</div><div class="item-actions"><button onclick="openItem('${i.id}')">Details</button><button onclick="openInstagram('${esc(i.url)}')">Open Instagram</button><button onclick="plan('${i.id}')">Plan</button><button onclick="watch('${i.id}')">${i.watch_count ? "Watched" : "Mark watched"}</button></div></article>`;
+        const meta = i.source_metadata || {};
+        const thumbnailSource = meta.thumbnail_file_id
+          ? `/api/thumbnails/${encodeURIComponent(meta.thumbnail_file_id)}`
+          : meta.thumbnail_url;
+        const thumb = thumbnailSource
+          ? `<img src="${esc(thumbnailSource)}" alt="${esc(meta.visible_label || "Instagram preview")}" style="width:100%;height:145px;object-fit:cover;border-radius:9px;background:#edf0f4" onerror="this.remove()">`
+          : "";
+        const analysisWaiting = [
+          "QUEUED",
+          "PROCESSING",
+          "WAITING_FOR_QUOTA",
+        ].includes(i.analysis_status);
+        const analysisAction =
+          i.analysis_status === "FAILED"
+            ? `<button onclick="retryJobForItem('${esc(i.id)}')">Retry analysis</button>`
+            : i.analysis_status === "COMPLETED"
+              ? `<button onclick="openItem('${esc(i.id)}')">View analysis</button>`
+              : analysisWaiting
+                ? `<button disabled>${i.analysis_status === "WAITING_FOR_QUOTA" ? "Waiting for quota" : "Analysis in progress"}</button>`
+                : `<button onclick="analyze('${esc(i.id)}')">Analyze with AI</button>`;
+        return `<article class="card item">${thumb}<div class="item-title">${esc(i.caption || meta.visible_label || i.creator_username || "Saved Instagram item")}</div><div class="muted">${esc(i.creator_username ? "@" + i.creator_username : i.source_method || "MANUAL")} · ${esc(i.media_status || "UNKNOWN")}</div><div class="chips">${badge(i)}<span class="chip">${i.is_useful ? "IN USEFUL" : "NOT CURATED"}</span><span class="chip">Usefulness ${i.usefulness_score ?? "—"}</span></div><div class="muted">${analysisLabel(i.analysis_status)} · ${esc(i.status || "UNWATCHED")}</div><div class="item-actions"><button onclick="openItem('${esc(i.id)}')">Details</button><a class="btn alt" href="${esc(i.url)}" target="_blank" rel="noopener noreferrer">Open Instagram</a>${analysisAction}<button onclick="toggleUseful('${esc(i.id)}', ${!Boolean(i.is_useful)})">${i.is_useful ? "In Useful" : "Add to Useful"}</button><button onclick="watch('${esc(i.id)}')">${i.watch_count ? "Watched" : "Mark watched"}</button><button class="danger" onclick="deleteItem('${esc(i.id)}')">Delete</button></div></article>`;
       }
       async function loadDashboard() {
         let d = await api("/api/dashboard");
+        if (!d.success) {
+          $("#metrics").innerHTML =
+            `<div class="card empty error">${esc(d.error?.message || "Could not load dashboard data.")}</div>`;
+          return;
+        }
         let m = [
           ["Total saves", d.total_items],
+          ["Useful", d.useful_items],
           ["Unwatched", d.unwatched],
           ["AI analyzed", d.ai_analyzed],
           ["Worth implementing", d.worth_implementing],
-          ["Watched", d.watched],
-          ["Pending analysis", d.analysis_pending],
-          ["Applied", d.applied],
-          ["Not useful", d.not_useful],
+          ["Not analyzed", d.not_analyzed],
+          ["Queued", d.analysis_queued],
+          ["Waiting for quota", d.analysis_waiting_quota],
+          ["Processing", d.analysis_processing],
+          ["Failed", d.analysis_failed],
         ];
         $("#metrics").innerHTML = m
           .map(
@@ -2132,48 +2262,104 @@ const esc = (x) =>
           '<div class="card empty">Your library is ready for its first save.</div>';
       }
       async function loadLibrary() {
-  let p = new URLSearchParams({
-    page: libraryPage,
-    page_size: LIBRARY_PAGE_SIZE,
-    sort: $("#sort").value,
-    search: $("#search").value,
-    status: $("#filter-status").value,
-  });
+        let p = new URLSearchParams({
+          page: libraryPage,
+          page_size: LIBRARY_PAGE_SIZE,
+          sort: $("#sort").value,
+          search: $("#search").value,
+          status: $("#filter-status").value,
+          analysis_status: $("#filter-analysis").value,
+        });
 
-  let d = await api("/api/items?" + p);
+        let d = await api("/api/items?" + p);
+        if (!d.success) {
+          $("#library-count").textContent = "";
+          $("#library-cards").innerHTML =
+            `<div class="card empty error">${esc(d.error?.message || "Could not load the library.")}</div>`;
+          $("#library-pagination").innerHTML = "";
+          return;
+        }
 
-  const pagination = d.pagination || {};
-  const total = pagination.total || 0;
-  const pageSize = pagination.page_size || LIBRARY_PAGE_SIZE;
-  const currentPage = pagination.page || libraryPage;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+        const pagination = d.pagination || {};
+        const total = pagination.total || 0;
+        const pageSize = pagination.page_size || LIBRARY_PAGE_SIZE;
+        const currentPage = pagination.page || libraryPage;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  // Protect against a page becoming invalid after filtering/deleting items.
-  if (total > 0 && currentPage > totalPages) {
-    libraryPage = totalPages;
-    return loadLibrary();
-  }
+        // Protect against a page becoming invalid after filtering/deleting items.
+        if (total > 0 && currentPage > totalPages) {
+          libraryPage = totalPages;
+          return loadLibrary();
+        }
 
-  $("#library-count").textContent =
-    total + " saved items";
+        $("#library-count").textContent = total + " saved items";
 
-  $("#library-cards").innerHTML =
-    (d.items || []).map(itemCard).join("") ||
-    '<div class="card empty">No items match your filters.</div>';
+        $("#library-cards").innerHTML =
+          (d.items || []).map(itemCard).join("") ||
+          '<div class="card empty">No items match your filters.</div>';
 
-  renderLibraryPagination(currentPage, totalPages, total);
-}
-function renderLibraryPagination(currentPage, totalPages, total) {
-  const container = $("#library-pagination");
+        renderLibraryPagination(currentPage, totalPages, total);
+        saveUiState("library");
+      }
+      async function loadUseful() {
+        const params = new URLSearchParams({
+          page: usefulPage,
+          page_size: LIBRARY_PAGE_SIZE,
+          sort: $("#useful-sort").value,
+          search: $("#useful-search").value,
+          useful: "true",
+        });
+        const d = await api("/api/items?" + params);
+        if (!d.success) {
+          $("#useful-cards").innerHTML =
+            `<div class="card empty error">${esc(d.error?.message || "Could not load useful Reels.")}</div>`;
+          return;
+        }
+        const pagination = d.pagination || {};
+        const total = pagination.total || 0;
+        const pageSize = pagination.page_size || LIBRARY_PAGE_SIZE;
+        const page = pagination.page || usefulPage;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+        if (total > 0 && page > totalPages) {
+          usefulPage = totalPages;
+          return loadUseful();
+        }
+        $("#useful-count").textContent =
+          total + " useful Reel" + (total === 1 ? "" : "s");
+        $("#useful-cards").innerHTML =
+          (d.items || []).map(itemCard).join("") ||
+          '<div class="card empty">Add any Reel to Useful to create your curated library.</div>';
+        renderUsefulPagination(page, totalPages, total);
+        saveUiState("useful");
+      }
+      function renderUsefulPagination(currentPage, totalPages, total) {
+        const container = $("#useful-pagination");
+        if (total === 0 || totalPages <= 1) {
+          container.innerHTML = "";
+          return;
+        }
+        container.innerHTML = `
+          <button class="btn alt" onclick="changeUsefulPage(${currentPage - 1})" ${currentPage <= 1 ? "disabled" : ""}>← Previous</button>
+          <span class="page-info">Page ${currentPage} of ${totalPages}</span>
+          <button class="btn alt" onclick="changeUsefulPage(${currentPage + 1})" ${currentPage >= totalPages ? "disabled" : ""}>Next →</button>`;
+      }
+      function changeUsefulPage(page) {
+        if (page < 1) return;
+        usefulPage = page;
+        loadUseful();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      function renderLibraryPagination(currentPage, totalPages, total) {
+        const container = $("#library-pagination");
 
-  if (!container) return;
+        if (!container) return;
 
-  if (total === 0 || totalPages <= 1) {
-    container.innerHTML = "";
-    return;
-  }
+        if (total === 0 || totalPages <= 1) {
+          container.innerHTML = "";
+          return;
+        }
 
-  container.innerHTML = `
+        container.innerHTML = `
     <button
       class="btn alt"
       onclick="changeLibraryPage(${currentPage - 1})"
@@ -2194,18 +2380,18 @@ function renderLibraryPagination(currentPage, totalPages, total) {
       Next →
     </button>
   `;
-}
-function changeLibraryPage(page) {
-  if (page < 1) return;
+      }
+      function changeLibraryPage(page) {
+        if (page < 1) return;
 
-  libraryPage = page;
-  loadLibrary();
+        libraryPage = page;
+        loadLibrary();
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-}
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
       async function loadRecommendations() {
         let d = await api("/api/recommendations?limit=50");
         $("#recommendation-cards").innerHTML =
@@ -2246,14 +2432,28 @@ function changeLibraryPage(page) {
         if (!d.item) return;
         let i = d.item,
           m = i.source_metadata || {},
-          thumb = m.thumbnail_url
-            ? `<img src="${esc(m.thumbnail_url)}" alt="Instagram preview" style="width:100%;max-height:280px;object-fit:cover;border-radius:10px" onerror="this.remove()">`
+          thumbnailSource = m.thumbnail_file_id
+            ? `/api/thumbnails/${encodeURIComponent(m.thumbnail_file_id)}`
+            : m.thumbnail_url,
+          thumb = thumbnailSource
+            ? `<img src="${esc(thumbnailSource)}" alt="Instagram preview" style="width:100%;max-height:280px;object-fit:cover;border-radius:10px" onerror="this.remove()">`
             : "";
         $("#drawer").classList.remove("hidden");
         $("#drawer-title").textContent =
           i.caption || m.visible_label || i.creator_username || "Saved item";
+        const analysisControl =
+          i.analysis_status === "FAILED"
+            ? `<button class="btn alt" onclick="retryJobForItem('${esc(i.id)}')">Retry analysis</button>`
+            : i.analysis_status === "COMPLETED"
+              ? `<button class="btn alt" onclick="reanalyze('${esc(i.id)}')">Reanalyze</button>`
+              : i.analysis_status === "WAITING_FOR_QUOTA"
+                ? '<button class="btn alt" disabled>Waiting for Gemini quota</button>'
+                : i.analysis_status === "QUEUED" ||
+                    i.analysis_status === "PROCESSING"
+                  ? '<button class="btn alt" disabled>Analysis in progress</button>'
+                  : `<button class="btn alt" onclick="analyze('${esc(i.id)}')">Analyze with AI</button>`;
         $("#drawer-body").innerHTML =
-          `${thumb}<p><a href="${esc(i.url)}" target="_blank">Open on Instagram ↗</a></p><div class="chips">${badge(i)}<span class="chip">${esc(i.status)}</span><span class="chip">Priority ${esc(i.priority)}</span><span class="chip">${esc(i.media_type || "POST")}</span></div><p class="muted">Media: ${esc(i.media_status)} · Analysis: ${esc(i.analysis_status)} · Source: ${esc(i.source_method)}</p><div class="form"><label>Why I saved<br><textarea id="why" rows="2">${esc(i.why_saved)}</textarea></label><br><label>My notes<br><textarea id="notes" rows="3">${esc(i.user_notes)}</textarea></label><br><button class="btn" onclick="saveNotes('${i.id}')">Save notes</button> <button class="btn alt" onclick="plan('${i.id}')">Plan implementation</button> <button class="btn alt" onclick="showAnalysis('${i.id}')">View AI analysis</button> <button class="btn alt" onclick="analyze('${i.id}',${JSON.stringify(Boolean(i.caption || i.user_notes || i.why_saved))})">Analyze</button></div>`;
+          `${thumb}<p><a href="${esc(i.url)}" target="_blank" rel="noopener noreferrer">Open on Instagram ↗</a></p><div class="chips">${badge(i)}<span class="chip">${i.is_useful ? "IN USEFUL" : "NOT CURATED"}</span><span class="chip">${esc(i.status)}</span><span class="chip">Priority ${esc(i.priority)}</span></div><p class="muted">Media: ${esc(i.media_status)} · Analysis: ${esc(i.analysis_status)} · Source: ${esc(i.source_method)}</p><div class="form"><label>Category<br><input id="category" value="${esc(i.category || "")}" placeholder="e.g. Backend"></label><br><label>Tags (comma separated)<br><input id="tags" value="${esc((i.tags || []).join(", "))}" placeholder="Python, Flask"></label><br><label>Why I saved<br><textarea id="why" rows="2">${esc(i.why_saved)}</textarea></label><br><label>My notes<br><textarea id="notes" rows="3">${esc(i.user_notes)}</textarea></label><br><button class="btn" onclick="saveNotes('${esc(i.id)}')">Save changes</button> <button class="btn alt" onclick="toggleUseful('${esc(i.id)}', ${!Boolean(i.is_useful)})">${i.is_useful ? "Remove from Useful" : "Add to Useful"}</button> <button class="btn alt" onclick="plan('${esc(i.id)}')">Plan implementation</button> <button class="btn alt" onclick="showAnalysis('${esc(i.id)}')">View AI analysis</button> ${analysisControl} <button class="btn danger" onclick="deleteItem('${esc(i.id)}')">Delete Reel</button></div>`;
       }
       async function saveNotes(id) {
         await api("/api/items/" + id, {
@@ -2262,9 +2462,16 @@ function changeLibraryPage(page) {
           body: JSON.stringify({
             why_saved: $("#why").value,
             user_notes: $("#notes").value,
+            category: $("#category").value.trim() || null,
+            tags: $("#tags")
+              .value.split(",")
+              .map((tag) => tag.trim())
+              .filter(Boolean),
           }),
         });
-        toast("Notes saved");
+        toast("Changes saved");
+        loadLibrary();
+        loadUseful();
       }
       async function showAnalysis(id) {
         $("#drawer").classList.remove("hidden");
@@ -2286,19 +2493,77 @@ function changeLibraryPage(page) {
           warning +
           `<div class="analysis-copy"><h3>${esc(a.summary)}</h3><p><b>Core idea:</b> ${esc(a.core_idea)}</p><p><b>Why useful:</b> ${esc(a.why_useful)}</p><p><b>Recommendation:</b> ${esc(a.recommendation)} · <b>Difficulty:</b> ${esc(a.difficulty)}</p><h3>Key takeaways</h3><ul>${(a.key_takeaways || []).map((x) => `<li>${esc(x)}</li>`).join("") || "<li>None available from the supplied content.</li>"}</ul><h3>Actionable steps</h3><ol>${(a.actionable_steps || []).map((x) => `<li>${esc(x)}</li>`).join("") || "<li>None available from the supplied content.</li>"}</ol><p class="muted">Basis: ${esc(a.analysis_basis)}</p></div>`;
       }
-      async function analyze(id, hasContent = true) {
-        if (!hasContent) {
-          toast(
-            "No caption, transcript, or notes yet. SavedFlow will not send a URL-only Reel to Gemini.",
-          );
+      async function analyze(id) {
+        let d = await api("/api/items/" + id + "/analyze", { method: "POST" });
+        toast(
+          d.success
+            ? "Analysis queued. The local worker will process it."
+            : d.error?.message || "Could not queue analysis",
+        );
+        if (d.success) {
+          poll(id, d.job?.id);
+          loadLibrary();
+        }
+      }
+      async function reanalyze(id) {
+        const d = await api("/api/items/" + id + "/reanalyze", {
+          method: "POST",
+        });
+        toast(
+          d.success
+            ? "Reanalysis queued."
+            : d.error?.message || "Could not queue reanalysis.",
+        );
+        if (d.success) poll(id, d.job?.id);
+      }
+      async function retryJobForItem(id) {
+        const d = await api("/api/items/" + id + "/retry-analysis", {
+          method: "POST",
+        });
+        toast(
+          d.success
+            ? "Retry queued."
+            : d.error?.message || "Could not retry analysis.",
+        );
+        if (d.success) poll(id, d.job?.id);
+      }
+      async function toggleUseful(id, isUseful) {
+        const d = await api("/api/items/" + id + "/useful", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ is_useful: isUseful }),
+        });
+        toast(
+          d.success
+            ? isUseful
+              ? "Added to Useful."
+              : "Removed from Useful."
+            : d.error?.message || "Could not update Useful.",
+        );
+        if (d.success) {
+          loadLibrary();
+          loadUseful();
+          loadDashboard();
+          if (!$("#drawer").classList.contains("hidden")) openItem(id);
+        }
+      }
+      async function deleteItem(id) {
+        if (
+          !window.confirm(
+            "Delete this Reel from SavedFlow? This does not unsave it on Instagram.",
+          )
+        )
+          return;
+        const d = await api("/api/items/" + id, { method: "DELETE" });
+        if (!d.success) {
+          toast(d.error?.message || "Could not delete this Reel.");
           return;
         }
-        let d = await api("/api/items/" + id + "/analyze", { method: "POST" });
-        toast(d.success ? "Analysis queued" : "Could not queue analysis");
-        if (d.success) {
-          showAnalysis(id);
-          poll(id, d.job?.id);
-        }
+        closeDrawer();
+        toast("Reel deleted from SavedFlow.");
+        loadDashboard();
+        loadLibrary();
+        loadUseful();
       }
       async function poll(id, job) {
         if (!job) return;
@@ -2308,10 +2573,17 @@ function changeLibraryPage(page) {
           if (d.job?.status === "COMPLETED") {
             showAnalysis(id);
             loadDashboard();
+            loadLibrary();
             return;
           }
           if (d.job?.status === "FAILED") {
             toast("Analysis failed: " + d.job.error);
+            return;
+          }
+          if (d.job?.status === "WAITING_FOR_QUOTA") {
+            toast(
+              "Analysis is waiting for Gemini quota and will resume automatically.",
+            );
             return;
           }
         }
@@ -2330,8 +2602,12 @@ function changeLibraryPage(page) {
           toast(d.error?.message || "Could not create implementation task");
       }
       async function watch(id) {
-        await api("/api/items/" + id + "/watch", { method: "POST" });
-        toast("Marked watched");
+        const d = await api("/api/items/" + id + "/watch", { method: "POST" });
+        toast(
+          d.success
+            ? "Marked watched"
+            : d.error?.message || "Could not update this Reel.",
+        );
         loadDashboard();
         loadLibrary();
       }
@@ -2360,98 +2636,139 @@ function changeLibraryPage(page) {
         setTimeout(() => ($("#toast").textContent = ""), 3500);
       }
       async function showSync() {
-  await requestInstagramSync();
-}
+        await requestInstagramSync();
+      }
 
+      async function requestInstagramSync() {
+        try {
+          const response = await api("/api/instagram/sync/request", {
+            method: "POST",
+          });
 
-async function requestInstagramSync() {
-  try {
-    const response = await api(
-      "/api/instagram/sync/request",
-      {
-        method: "POST",
-      },
-    );
+          if (!response.success) {
+            toast("Could not start Instagram sync.");
+            return;
+          }
 
-    if (!response.success) {
-      toast("Could not start Instagram sync.");
-      return;
-    }
+          go("library");
 
-    go("library");
+          if (response.already_running) {
+            toast("Instagram sync is already running.");
+          } else {
+            toast(
+              "Sync requested. Your local Instagram sync agent will start it.",
+            );
+          }
 
-    if (response.already_running) {
-      toast("Instagram sync is already running.");
-    } else {
-      toast(
-        "Sync requested. Your local Instagram sync agent will start it.",
-      );
-    }
+          pollSyncStatus();
+        } catch (error) {
+          toast("Could not request Instagram sync.");
+          console.error(error);
+        }
+      }
 
-    pollSyncStatus();
+      async function pollSyncStatus() {
+        try {
+          const response = await api("/api/import/status");
 
-  } catch (error) {
-    toast(
-      "Could not request Instagram sync.",
-    );
-    console.error(error);
-  }
-}
+          const sync = response.sync;
 
+          if (!sync) {
+            return;
+          }
 
-async function pollSyncStatus() {
-  try {
-    const response = await api(
-      "/api/import/status",
-    );
+          const statusElement = $("#sync-status");
 
-    const sync = response.sync;
+          if (statusElement) {
+            statusElement.textContent = `Instagram sync: ${sync.status}`;
+          }
 
-    if (!sync) {
-      return;
-    }
-
-    const statusElement = $("#sync-status");
-
-    if (statusElement) {
-      statusElement.textContent =
-        `Instagram sync: ${sync.status}`;
-    }
-
-    if (
-      sync.status === "QUEUED" ||
-      sync.status === "RUNNING"
-    ) {
-      setTimeout(
-        pollSyncStatus,
-        2000,
-      );
-    } else {
-      loadLibrary();
-    }
-
-  } catch (error) {
-    console.error(
-      "Unable to check sync status:",
-      error,
-    );
-  }
-}
+          if (sync.status === "QUEUED" || sync.status === "RUNNING") {
+            setTimeout(pollSyncStatus, 2000);
+          } else {
+            loadLibrary();
+          }
+        } catch (error) {
+          console.error("Unable to check sync status:", error);
+        }
+      }
       $("#search").oninput = () => {
-  libraryPage = 1;
-  loadLibrary();
-};
+        libraryPage = 1;
+        loadLibrary();
+      };
 
-$("#sort").onchange = () => {
-  libraryPage = 1;
-  loadLibrary();
-};
+      $("#sort").onchange = () => {
+        libraryPage = 1;
+        loadLibrary();
+      };
 
-$("#filter-status").onchange = () => {
-  libraryPage = 1;
-  loadLibrary();
-};
-      loadDashboard();
+      $("#filter-status").onchange = () => {
+        libraryPage = 1;
+        loadLibrary();
+      };
+      $("#filter-analysis").onchange = () => {
+        libraryPage = 1;
+        loadLibrary();
+      };
+      $("#useful-search").oninput = () => {
+        usefulPage = 1;
+        loadUseful();
+      };
+      $("#useful-sort").onchange = () => {
+        usefulPage = 1;
+        loadUseful();
+      };
+
+      function restoreUiState() {
+        let saved = {};
+        try {
+          saved = JSON.parse(sessionStorage.getItem(UI_STATE_KEY) || "{}");
+        } catch (_) {}
+        libraryPage =
+          Number.isInteger(saved.libraryPage) && saved.libraryPage > 0
+            ? saved.libraryPage
+            : 1;
+        usefulPage =
+          Number.isInteger(saved.usefulPage) && saved.usefulPage > 0
+            ? saved.usefulPage
+            : 1;
+        $("#search").value = saved.search || "";
+        $("#sort").value = saved.sort || "created_at";
+        $("#filter-status").value = saved.status || "";
+        $("#filter-analysis").value = saved.analysis || "";
+        $("#useful-search").value = saved.usefulSearch || "";
+        $("#useful-sort").value = saved.usefulSort || "date_added";
+        const fromHash = window.location.hash.replace(/^#/, "");
+        const view = views[fromHash]
+          ? fromHash
+          : views[saved.view]
+            ? saved.view
+            : "dashboard";
+        go(view, false);
+        if (Number.isFinite(saved.scrollY)) {
+          requestAnimationFrame(() => window.scrollTo(0, saved.scrollY));
+        }
+      }
+      let lastResumeRefresh = 0;
+      function refreshActiveView() {
+        const now = Date.now();
+        if (now - lastResumeRefresh < 1000) return;
+        lastResumeRefresh = now;
+        const activeView = document.querySelector(".view:not(.hidden)")?.id;
+        if (activeView && views[activeView]) go(activeView, false);
+      }
+      window.addEventListener("pagehide", () => saveUiState());
+      window.addEventListener("hashchange", () =>
+        go(window.location.hash.replace(/^#/, ""), false),
+      );
+      window.addEventListener("pageshow", (event) => {
+        if (event.persisted) restoreUiState();
+      });
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") saveUiState();
+        if (document.visibilityState === "visible") refreshActiveView();
+      });
+      restoreUiState();
     </script>
   </body>
 </html>

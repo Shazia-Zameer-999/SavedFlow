@@ -3,6 +3,7 @@ BaseImporter defines the common contract every import method follows, so
 routes/imports.py can treat API/export/manual import uniformly and so the
 result shape is always the same (section 3.3's example response).
 """
+
 from abc import ABC, abstractmethod
 
 
@@ -16,6 +17,7 @@ class ImportResult:
         self.imported_ids = []
         self.content_available = 0
         self.metadata_only = 0
+        self.skipped_deleted = 0
 
     def to_dict(self):
         return {
@@ -27,6 +29,7 @@ class ImportResult:
             "imported_ids": [str(i) for i in self.imported_ids],
             "content_available": self.content_available,
             "metadata_only": self.metadata_only,
+            "skipped_deleted": self.skipped_deleted,
         }
 
 

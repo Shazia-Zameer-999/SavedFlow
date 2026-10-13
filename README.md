@@ -20,7 +20,7 @@ Legitimate Import (manual URLs / data export / official API where supported)
         v
     MongoDB
         v
-   AI Analysis (via OpenAI)
+   AI Analysis (via Gemini)
         v
 Extract Knowledge / Score Usefulness / Rank
         v
@@ -60,7 +60,7 @@ limitation, not a missing feature in SavedFlow.
 ```
 
 The app still functions fully via the other two import methods below.
-`services/instagram/api_importer.py` also implements one *legitimate*,
+`services/instagram/api_importer.py` also implements one _legitimate_,
 narrower use of the official API - fetching a connected business/creator
 account's own **published** media (not Saved posts) via
 `/{ig-user-id}/media` - which the API does genuinely support, in case
@@ -93,8 +93,8 @@ savedflow/
 │   ├── instagram/               # BaseImporter + 3 concrete importers
 │   ├── ai/                      # client, prompts, analyzer, ranking,
 │   │                            # recommendations, duplicate_detector
-│   ├── media/                   # transcript/frame placeholders (section 4)
-│   └── jobs/                    # thread-based background job runner
+│   ├── media/                   # video, frame, transcript, and GridFS evidence
+│   └── jobs/                    # MongoDB-backed job creation and claiming
 │
 ├── models/                     # plain-dict schema builders (no heavy ORM)
 ├── utils/                      # url validation, errors, pagination, dates
@@ -116,9 +116,8 @@ analysis records its `analysis_basis` (`METADATA_ONLY`, `TRANSCRIPT`,
 - Python 3.10+
 - MongoDB running locally (or a `MONGO_URI` pointing at one) - **not**
   required to run the test suite, which uses `mongomock`.
-- An OpenAI API key (optional - the app runs and reports itself as
-  correctly "not configured" without one; AI analysis and the weekly
-  review's narrative will simply be unavailable/generic until a key is set).
+- A Gemini API key (optional - the app runs and reports itself as
+  correctly "not configured" without one; AI analysis and AI analysis will report a configuration error until a key is set).
 
 ## 5. Setup
 
@@ -127,31 +126,45 @@ cd savedflow
 python -m venv venv
 source venv/bin/activate        # on Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env
-# edit .env with your MongoDB URI and (optionally) OpenAI/Meta credentials
+# Create .env with your MongoDB URI and optional Gemini/Meta credentials
 python app.py
 ```
 
-Then open http://127.0.0.1:5000 for the bare test page, or hit the API
+Then open http://127.0.0.1:5002 for the bare test page, or hit the API
 directly, e.g.:
 
 ```bash
-curl http://127.0.0.1:5000/api/health
+curl http://127.0.0.1:5002/api/health
 ```
+
+Start the persistent worker in another terminal:
+
+```bash
+source venv/bin/activate
+python scripts/ai_worker.py
+```
+
+The worker polls MongoDB every five seconds by default and processes one job
+at a time. Set `SAVEDFLOW_WORKER_POLL_SECONDS` to change the interval. Jobs
+remain queued while it is offline and resume when it starts.
 
 ### Environment variables (`.env`)
 
-| Variable | Required | Purpose |
-|---|---|---|
-| `FLASK_ENV` | no | `development` or `production` |
-| `FLASK_SECRET_KEY` | recommended | Flask session/signing key |
-| `MONGO_URI` | yes | MongoDB connection string |
-| `MONGO_DB_NAME` | yes | Database name |
-| `META_APP_ID` / `META_APP_SECRET` | no | Only needed for the official API's own-media fetch |
-| `META_ACCESS_TOKEN` | no | Long-lived Meta Graph API access token |
-| `INSTAGRAM_ACCOUNT_ID` | no | Your connected IG business/creator account id |
-| `OPENAI_API_KEY` | no (but needed for AI analysis) | OpenAI API key |
-| `OPENAI_MODEL` | no | Defaults to `gpt-4o-mini` |
+| Variable                          | Required                        | Purpose                                                        |
+| --------------------------------- | ------------------------------- | -------------------------------------------------------------- |
+| `FLASK_ENV`                       | no                              | `development` or `production`                                  |
+| `FLASK_SECRET_KEY`                | recommended                     | Flask session/signing key                                      |
+| `MONGO_URI`                       | yes                             | MongoDB connection string                                      |
+| `MONGO_DB_NAME`                   | yes                             | Database name                                                  |
+| `META_APP_ID` / `META_APP_SECRET` | no                              | Only needed for the official API's own-media fetch             |
+| `META_ACCESS_TOKEN`               | no                              | Long-lived Meta Graph API access token                         |
+| `INSTAGRAM_ACCOUNT_ID`            | no                              | Your connected IG business/creator account id                  |
+| `GEMINI_API_KEY`                  | no (but needed for AI analysis) | Gemini API key                                                 |
+| `GEMINI_MODEL`                    | no                              | Defaults to `gemini-2.5-flash`                                 |
+| `GEMINI_DAILY_REQUEST_LIMIT`      | no                              | Maximum outbound Gemini requests per UTC day; defaults to `20` |
+| `SAVEDFLOW_WORKER_POLL_SECONDS`   | no                              | Worker poll interval; defaults to 5 seconds                    |
+| `SAVEDFLOW_WORKER_TOKEN`          | for HTTP worker endpoint        | Worker endpoint shared secret                                  |
+| `SAVEDFLOW_SYNC_TOKEN`            | for local sync agent            | Sync endpoint shared secret                                    |
 
 Secrets are **never** sent to the frontend, logged, or hardcoded anywhere.
 
@@ -165,31 +178,29 @@ Secrets are **never** sent to the frontend, logged, or hardcoded anywhere.
 4. Note again: this grants access to **your own published media and
    account info**, not your private Saved collection.
 
-### OpenAI setup
+### Gemini setup
 
-Create an API key at platform.openai.com and put it in `OPENAI_API_KEY`.
-`OPENAI_MODEL` defaults to `gpt-4o-mini`; any chat-completions-capable
-model that supports JSON mode will work.
+Create a Gemini API key and put it in `GEMINI_API_KEY`. The server keeps
+this key; browser clients and local sync requests do not receive it.
 
 ## 6. How AI analysis works
 
-1. `determine_available_content()` decides honestly what content exists
-   for an item: a caption, an attached transcript, or nothing - never a
-   video/audio stream, since V1 has no legitimate way to fetch one.
-2. `services/ai/prompts.py` builds a system prompt that explicitly tells
+1. The user explicitly requests analysis for an item. Importing saved
+   metadata does not create an AI job.
+2. The worker reuses saved evidence where available. Without evidence, the
+   analysis is explicitly based on metadata or a supplied transcript.
+3. `services/ai/prompts.py` builds a system prompt that explicitly tells
    the model to treat the caption/transcript as **untrusted data**, not
    instructions (prevents prompt injection from a video's own caption).
-3. `services/ai/client.py` is the only file that imports the `openai`
-   package, calls it with `response_format={"type": "json_object"}`, and
-   returns the raw text.
-4. `services/ai/analyzer.py::validate_structured_output` validates every
+4. `services/ai/client.py` is the only file that imports the Gemini SDK,
+   requests JSON output, and returns the raw text.
+5. `services/ai/analyzer.py::validate_structured_output` validates every
    field of the schema (types, required list fields, 0-100 score ranges,
    valid enums for `difficulty`/`recommendation`) before anything is
    stored. Invalid output never reaches MongoDB - the job is marked
    `FAILED` with the validation error instead.
-5. Analysis runs as a background job (`services/jobs/manager.py`, a plain
-   Python thread - no Redis/Celery) so the HTTP request returns
-   immediately with a job you can poll via `GET /api/jobs/<id>`.
+6. The HTTP route queues a MongoDB job and returns immediately. The persistent
+   worker atomically claims one job at a time; poll it via `GET /api/jobs/<id>`.
 
 ## 7. How ranking works
 
@@ -225,8 +236,8 @@ opaque ML model - the whole mechanism is inspectable in
 pytest -q
 ```
 
-No real MongoDB, OpenAI, or Meta credentials are needed - MongoDB is
-replaced by `mongomock`, and OpenAI calls are mocked via `monkeypatch` in
+No real MongoDB, Gemini, or Meta credentials are needed - MongoDB is
+replaced by `mongomock`, and Gemini calls are mocked via `monkeypatch` in
 `tests/test_ai.py`.
 
 ## 10. API reference
@@ -234,7 +245,10 @@ replaced by `mongomock`, and OpenAI calls are mocked via `monkeypatch` in
 All responses are JSON. All errors follow:
 
 ```json
-{"success": false, "error": {"code": "SOME_CODE", "message": "human readable message"}}
+{
+  "success": false,
+  "error": { "code": "SOME_CODE", "message": "human readable message" }
+}
 ```
 
 ### Health
@@ -245,7 +259,7 @@ Response: `{"status": "ok", "database": "connected", "ai_configured": bool, "ins
 ### Items
 
 **GET `/api/items`**
-Query params: `status`, `category`, `recommendation`, `watched` (`true`/`false`), `min_score`, `search`, `sort` (`usefulness`|`created_at`|`development_relevance`), `page`, `page_size`.
+Query params: `status`, `category`, `recommendation`, `watched` (`true`/`false`), `useful` (`true`/`false`), `min_score`, `search`, `sort` (`usefulness`|`created_at`|`oldest`|`date_added`|`development_relevance`), `page`, `page_size`.
 Response: `{"success": true, "items": [...], "pagination": {"page", "page_size", "total"}}`
 
 **GET `/api/items/<id>`** → `{"success": true, "item": {...}}`
@@ -286,7 +300,7 @@ No body needed. Always reports the Saved-collection limitation honestly (see sec
 
 ### AI analysis & jobs
 
-**POST `/api/items/<id>/analyze`** → `202` `{"success": true, "job": {...}}` (job runs synchronously in tests, in a background thread otherwise)
+**POST `/api/items/<id>/analyze`** → `202` `{"success": true, "job": {...}}` (returns a queued job)
 
 **POST `/api/items/<id>/reanalyze`** → same shape, always creates a new analysis version, preserving previous ones.
 
@@ -310,6 +324,7 @@ Errors: `ANALYSIS_NOT_FOUND` (404)
 
 All three accept `?limit=N` (default 20, max 100) and return entries shaped
 like:
+
 ```json
 {"item_id": "...", "item": {...}, "score": 94, "reason": "..."}
 ```
@@ -325,7 +340,7 @@ like:
 
 ### Weekly review
 
-**POST `/api/weekly-review`** - generates a review from the last 7 days of real data (imports, watches, applies, top categories, top items) plus an AI-written narrative summary if `OPENAI_API_KEY` is configured, otherwise a simple templated one.
+**POST `/api/weekly-review`** - generates a review from the last 7 days of real data (imports, watches, applies, top categories, top items) plus an AI-written narrative summary if `GEMINI_API_KEY` is configured, otherwise a simple templated one.
 **GET `/api/weekly-review/<id>`**
 
 ## 11. Database indexes
@@ -348,13 +363,11 @@ report `database: "disconnected"` until MongoDB comes up):
 
 - **`database: "disconnected"` from `/api/health`**: MongoDB isn't
   reachable at `MONGO_URI`. Start MongoDB or fix the URI.
-- **`ai_configured: false`**: `OPENAI_API_KEY` isn't set in `.env`.
-  Analysis jobs will fail with a clear `OPENAI_API_KEY is not configured.`
+- **`ai_configured: false`**: `GEMINI_API_KEY` isn't set in `.env`.
+  Analysis jobs will fail with a clear `GEMINI_API_KEY is not configured.`
   error rather than hanging or faking a result.
-- **Analysis job stuck at `QUEUED`/`PROCESSING`**: check the app logs -
-  the background thread runs in-process, so a crashed Flask process loses
-  in-flight jobs (acceptable for a V1 single-user app; a durable queue
-  would be a future improvement).
+- **Analysis job stuck at `QUEUED`**: start `python scripts/ai_worker.py` and
+  check worker logs. Stale `PROCESSING` job recovery is not yet implemented.
 - **`INVALID_INSTAGRAM_URL`**: only `instagram.com/reel/...`,
   `/reels/...`, `/p/...`, and `/tv/...` links are recognized.
 
@@ -368,7 +381,27 @@ report `database: "disconnected"` until MongoDB comes up):
 - All error responses use consistent, generic error codes/messages and
   never leak stack traces or credentials.
 
-## 14. Future improvements (explicitly out of scope for V1)
+## 14. Production and current limitations
+
+The repository has no browser-based frontend, authentication system, or
+deployment manifest for a persistent backend. Vercel can host a frontend,
+but Flask, MongoDB connectivity, authenticated browser capture, and the
+long-running worker need a persistent backend/worker host. Configure TLS,
+network access, secrets, and backups before production; this project has not
+been deployed or connected to production infrastructure.
+
+The local Instagram sync profile and `.env` contain sensitive session data
+and must stay out of Git. Importing stores discovered metadata and thumbnails;
+it does not enqueue AI analysis. Analysis must be requested for an individual
+item. Adding a Reel to personal curation (if supported by a future UI) is a
+separate preference; deleting from SavedFlow does not unsave it on Instagram.
+
+- Stale `PROCESSING` job recovery and a bounded retry API are not implemented.
+- A browser-based Useful/library experience is not implemented in this API repo.
+- Authentication and per-user isolation are absent; deployment assumes a
+  trusted single-user environment and should be protected at the network layer.
+
+## 15. Future improvements
 
 - A durable job queue (Redis/Celery) instead of in-process threads, for
   multi-worker deployments.
@@ -378,8 +411,8 @@ report `database: "disconnected"` until MongoDB comes up):
   page).
 - Multi-user support (schema is written to be extensible toward this, but
   V1 assumes a single user).
-script to run in local dev-
-python scripts/instagram_saved_sync.py \
-  --profile ./local-instagram-profile \
-  --saved-url https://www.instagram.com/shaziazameer.dev/saved/all-posts/ \
-  --server http://127.0.0.1:5001
+  script to run in local dev-
+  python scripts/instagram_saved_sync.py \
+   --profile ./local-instagram-profile \
+   --saved-url https://www.instagram.com/shaziazameer.dev/saved/all-posts/ \
+   --server http://127.0.0.1:5001
